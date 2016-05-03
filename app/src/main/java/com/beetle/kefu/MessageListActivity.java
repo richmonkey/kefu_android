@@ -24,6 +24,7 @@ import com.beetle.im.CustomerMessageObserver;
 import com.beetle.im.IMService;
 import com.beetle.im.IMServiceObserver;
 import com.beetle.bauhinia.tools.Notification;
+import com.beetle.kefu.model.NewCount;
 import com.beetle.kefu.model.Token;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -125,6 +126,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         NotificationCenter nc = NotificationCenter.defaultCenter();
         nc.addObserver(this, CustomerSupportMessageActivity.SEND_MESSAGE_NAME);
         nc.addObserver(this, CustomerSupportMessageActivity.CLEAR_MESSAGES);
+        nc.addObserver(this, CustomerSupportMessageActivity.CLEAR_NEW_MESSAGES);
 
         Bus bus = BusCenter.getBus();
         bus.register(this);
@@ -205,6 +207,8 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
             if (conv.message == null) {
                 continue;
             }
+            int unread = NewCount.getNewCount(conv.customerAppID, conv.customerID);
+            conv.setUnreadCount(unread);
             updateConversationName(conv);
             updateConversationDetail(conv);
             conversations.add(conv);
@@ -312,6 +316,16 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
             if (pos != -1) {
                 conversations.remove(pos);
                 adapter.notifyDataSetChanged();
+            }
+        } else if (notification.name.equals(CustomerSupportMessageActivity.CLEAR_NEW_MESSAGES)) {
+            HashMap<String, Long> obj = (HashMap<String, Long> )notification.obj;
+            long appid = obj.get("appid");
+            long uid = obj.get("uid");
+            int pos = findConversationPosition(appid, uid);
+            if (pos != -1) {
+                CustomerConversation cc = conversations.get(pos);
+                cc.setUnreadCount(0);
+                NewCount.setNewCount(appid, uid, 0);
             }
         }
     }
@@ -432,6 +446,9 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         } else {
             conversation = conversations.get(pos);
         }
+        int unread = conversation.getUnreadCount() + 1;
+        conversation.setUnreadCount(unread);
+        NewCount.setNewCount(conversation.customerAppID, conversation.customerID, unread);
 
         conversation.message = imsg;
         updateConversationName(conversation);

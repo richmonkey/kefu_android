@@ -38,6 +38,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
         CustomerSupportOutbox.OutboxObserver {
     public static final String SEND_MESSAGE_NAME = "send_cs_message";
     public static final String CLEAR_MESSAGES = "clear_cs_messages";
+    public static final String CLEAR_NEW_MESSAGES = "clear_cs_new_messages";
 
     private final int PAGE_SIZE = 10;
 
@@ -137,6 +138,13 @@ public class CustomerSupportMessageActivity extends MessageActivity
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "peer message activity destory");
+
+        NotificationCenter nc = NotificationCenter.defaultCenter();
+        HashMap<String, Long>  o = new HashMap();
+        o.put("appid", this.customerAppID);
+        o.put("uid", this.customerID);
+        Notification notification = new Notification(o, CLEAR_NEW_MESSAGES);
+        nc.postNotification(notification);
 
         CustomerSupportOutbox.getInstance().removeObserver(this);
         IMService.getInstance().removeObserver(this);
