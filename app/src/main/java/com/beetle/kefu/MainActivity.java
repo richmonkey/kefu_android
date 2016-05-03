@@ -10,6 +10,8 @@ import com.beetle.im.Timer;
 import com.beetle.kefu.api.APIService;
 import com.beetle.kefu.api.Authorization;
 import com.beetle.kefu.model.Token;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.util.Date;
@@ -46,7 +48,6 @@ public class MainActivity extends BaseActivity {
         IMService im =  IMService.getInstance();
         im.setToken(token.accessToken);
         im.start();
-
 
         int now = getNow();
         if (now >= Token.getInstance().expireTimestamp - 60) {
@@ -138,5 +139,12 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        IMService im = IMService.getInstance();
+        im.stop();
+
+    }
 
 }

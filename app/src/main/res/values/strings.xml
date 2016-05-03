@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">kefu</string>
+    <string name="logout">注销</string>
 </resources>

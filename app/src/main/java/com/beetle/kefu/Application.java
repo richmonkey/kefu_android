@@ -8,6 +8,7 @@ import android.util.Log;
 import com.beetle.bauhinia.tools.FileCache;
 import com.beetle.im.IMService;
 import com.google.code.p.leveldb.LevelDB;
+import com.squareup.otto.Bus;
 
 import java.io.File;
 import java.util.List;
@@ -16,8 +17,8 @@ import java.util.List;
  * Created by houxh on 16/5/2.
  */
 public class Application extends android.app.Application {
-
     private static final String TAG = "kefu";
+
     @Override
     public void onCreate() {
         super.onCreate();

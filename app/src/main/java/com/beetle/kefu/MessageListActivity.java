@@ -25,6 +25,8 @@ import com.beetle.im.IMService;
 import com.beetle.im.IMServiceObserver;
 import com.beetle.bauhinia.tools.Notification;
 import com.beetle.kefu.model.Token;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,11 +88,19 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_setting) {
+            Intent intent = new Intent(this, SettingActivity.class);
+            startActivity(intent);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -115,6 +125,9 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         NotificationCenter nc = NotificationCenter.defaultCenter();
         nc.addObserver(this, CustomerSupportMessageActivity.SEND_MESSAGE_NAME);
         nc.addObserver(this, CustomerSupportMessageActivity.CLEAR_MESSAGES);
+
+        Bus bus = BusCenter.getBus();
+        bus.register(this);
     }
 
     @Override
@@ -126,7 +139,15 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
         nc.removeObserver(this);
+        BusCenter.getBus().unregister(this);
         Log.i(TAG, "message list activity destroyed");
+    }
+
+
+    @Subscribe
+    public void onLogout(BusCenter.Logout e) {
+        Log.i(TAG, "message list activity logout...");
+        finish();
     }
 
 
