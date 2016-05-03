@@ -369,8 +369,8 @@ public class GroupMessageActivity extends MessageActivity implements
         }
     }
 
-
-    void sendMessage(IMessage imsg) {
+    @Override
+    protected void sendMessage(IMessage imsg) {
         if (imsg.content.getType() == IMessage.MessageType.MESSAGE_AUDIO) {
             GroupOutbox ob = GroupOutbox.getInstance();
             IMessage.Audio audio = (IMessage.Audio)imsg.content;
@@ -394,7 +394,7 @@ public class GroupMessageActivity extends MessageActivity implements
     }
 
     @Override
-    void saveMessageAttachment(IMessage msg, String address) {
+    protected void saveMessageAttachment(IMessage msg, String address) {
         IMessage attachment = new IMessage();
         attachment.content = IMessage.newAttachment(msg.msgLocalID, address);
         attachment.sender = msg.sender;
@@ -402,11 +402,13 @@ public class GroupMessageActivity extends MessageActivity implements
         saveMessage(attachment);
     }
 
-    void saveMessage(IMessage imsg) {
+    @Override
+    protected void saveMessage(IMessage imsg) {
         GroupMessageDB.getInstance().insertMessage(imsg, imsg.receiver);
     }
 
-    void markMessageFailure(IMessage imsg) {
+    @Override
+    protected void markMessageFailure(IMessage imsg) {
         long cid = 0;
         if (imsg.sender == this.currentUID) {
             cid = imsg.receiver;
@@ -416,7 +418,8 @@ public class GroupMessageActivity extends MessageActivity implements
         GroupMessageDB.getInstance().markMessageFailure(imsg.msgLocalID, cid);
     }
 
-    void eraseMessageFailure(IMessage imsg) {
+    @Override
+    protected void eraseMessageFailure(IMessage imsg) {
         long cid = 0;
         if (imsg.sender == this.currentUID) {
             cid = imsg.receiver;
@@ -426,7 +429,8 @@ public class GroupMessageActivity extends MessageActivity implements
         GroupMessageDB.getInstance().eraseMessageFailure(imsg.msgLocalID, cid);
     }
 
-    void clearConversation() {
+    @Override
+    protected void clearConversation() {
         super.clearConversation();
         GroupMessageDB db = GroupMessageDB.getInstance();
         db.clearCoversation(this.groupID);

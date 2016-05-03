@@ -88,7 +88,7 @@ public class MessageActivity extends BaseActivity implements
     protected ArrayList<IMessage> messages = new ArrayList<IMessage>();
     protected HashMap<Integer, IMessage.Attachment> attachments = new HashMap<Integer, IMessage.Attachment>();
 
-    BaseAdapter adapter;
+    protected BaseAdapter adapter;
 
     IMessage playingMessage;
 
@@ -108,11 +108,11 @@ public class MessageActivity extends BaseActivity implements
 
     protected String recordFileName;
 
-    AudioRecorder audioRecorder;
+    protected AudioRecorder audioRecorder;
     AudioUtil audioUtil;
 
-    ListView listview;
-    TextView titleView;
+    protected ListView listview;
+    protected TextView titleView;
     TextView subtitleView;
     Toolbar toolbar;
 
@@ -683,27 +683,27 @@ public class MessageActivity extends BaseActivity implements
         return (int)(t/1000);
     }
 
-    void sendMessage(IMessage imsg) {
+    protected void sendMessage(IMessage imsg) {
         Log.i(TAG, "not implemented");
     }
 
-    void saveMessageAttachment(IMessage msg, String address) {
+    protected void saveMessageAttachment(IMessage msg, String address) {
         Log.i(TAG, "not implemented");
     }
 
-    void saveMessage(IMessage imsg) {
+    protected void saveMessage(IMessage imsg) {
         Log.i(TAG, "not implemented");
     }
 
-    void markMessageFailure(IMessage imsg) {
+    protected void markMessageFailure(IMessage imsg) {
         Log.i(TAG, "not implemented");
     }
 
-    void eraseMessageFailure(IMessage imsg) {
+    protected void eraseMessageFailure(IMessage imsg) {
         Log.i(TAG, "not implemented");
     }
 
-    void clearConversation() {
+    protected void clearConversation() {
         Log.i(TAG, "clearConversation");
         messages = new ArrayList<IMessage>();
         adapter.notifyDataSetChanged();
@@ -807,7 +807,7 @@ public class MessageActivity extends BaseActivity implements
         messages = newMessages;
     }
 
-    void insertMessage(IMessage imsg) {
+    protected void insertMessage(IMessage imsg) {
         IMessage lastMsg = null;
         if (messages.size() > 0) {
             lastMsg = messages.get(messages.size() - 1);

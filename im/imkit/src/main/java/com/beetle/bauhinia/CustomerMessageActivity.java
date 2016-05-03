@@ -342,7 +342,7 @@ public class CustomerMessageActivity extends MessageActivity
     }
 
     @Override
-    void sendMessage(IMessage imsg) {
+    protected void sendMessage(IMessage imsg) {
         if (imsg.content.getType() == IMessage.MessageType.MESSAGE_AUDIO) {
             CustomerOutbox ob = CustomerOutbox.getInstance();
             IMessage.Audio audio = (IMessage.Audio)imsg.content;
@@ -371,7 +371,7 @@ public class CustomerMessageActivity extends MessageActivity
     }
 
     @Override
-    void saveMessageAttachment(IMessage msg, String address) {
+    protected void saveMessageAttachment(IMessage msg, String address) {
         ICustomerMessage attachment = new ICustomerMessage();
         attachment.content = IMessage.newAttachment(msg.msgLocalID, address);
         attachment.sender = msg.sender;
@@ -380,22 +380,23 @@ public class CustomerMessageActivity extends MessageActivity
     }
 
     @Override
-    void saveMessage(IMessage imsg) {
+    protected void saveMessage(IMessage imsg) {
         CustomerMessageDB.getInstance().insertMessage(imsg, storeID);
     }
 
     @Override
-    void markMessageFailure(IMessage imsg) {
+    protected void markMessageFailure(IMessage imsg) {
         CustomerMessageDB.getInstance().markMessageFailure(imsg.msgLocalID, storeID);
     }
 
     @Override
-    void eraseMessageFailure(IMessage imsg) {
+    protected void eraseMessageFailure(IMessage imsg) {
         CustomerMessageDB.getInstance().eraseMessageFailure(imsg.msgLocalID, storeID);
     }
 
     @Override
-    void clearConversation() {
+    protected void clearConversation() {
+        super.clearConversation();
         CustomerMessageDB db = CustomerMessageDB.getInstance();
         db.clearCoversation(this.storeID);
     }

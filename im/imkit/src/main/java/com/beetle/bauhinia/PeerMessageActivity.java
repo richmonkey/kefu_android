@@ -276,7 +276,7 @@ public class PeerMessageActivity extends MessageActivity implements
     }
 
     @Override
-    void sendMessage(IMessage imsg) {
+    protected void sendMessage(IMessage imsg) {
         if (imsg.content.getType() == IMessage.MessageType.MESSAGE_AUDIO) {
             PeerOutbox ob = PeerOutbox.getInstance();
             IMessage.Audio audio = (IMessage.Audio)imsg.content;
@@ -300,7 +300,7 @@ public class PeerMessageActivity extends MessageActivity implements
     }
 
     @Override
-    void saveMessageAttachment(IMessage msg, String address) {
+    protected void saveMessageAttachment(IMessage msg, String address) {
         IMessage attachment = new IMessage();
         attachment.content = IMessage.newAttachment(msg.msgLocalID, address);
         attachment.sender = msg.sender;
@@ -309,7 +309,7 @@ public class PeerMessageActivity extends MessageActivity implements
     }
 
     @Override
-    void saveMessage(IMessage imsg) {
+    protected void saveMessage(IMessage imsg) {
         if (imsg.sender == this.currentUID) {
             PeerMessageDB.getInstance().insertMessage(imsg, imsg.receiver);
         } else {
@@ -318,7 +318,7 @@ public class PeerMessageActivity extends MessageActivity implements
     }
 
     @Override
-    void markMessageFailure(IMessage imsg) {
+    protected void markMessageFailure(IMessage imsg) {
         long cid = 0;
         if (imsg.sender == this.currentUID) {
             cid = imsg.receiver;
@@ -329,7 +329,7 @@ public class PeerMessageActivity extends MessageActivity implements
     }
 
     @Override
-    void eraseMessageFailure(IMessage imsg) {
+    protected void eraseMessageFailure(IMessage imsg) {
         long cid = 0;
         if (imsg.sender == this.currentUID) {
             cid = imsg.receiver;
@@ -340,7 +340,7 @@ public class PeerMessageActivity extends MessageActivity implements
     }
 
     @Override
-    void clearConversation() {
+    protected void clearConversation() {
         super.clearConversation();
 
         PeerMessageDB db = PeerMessageDB.getInstance();
