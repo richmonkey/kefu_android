@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.1"
 
     defaultConfig {
         applicationId "com.beetle.kefu"
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
@@ -22,5 +22,13 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:support-v4:21.+'
+    compile 'com.android.support:appcompat-v7:21.+'
+
+    //compile 'com.android.support:appcompat-v7:23.3.0'
+
+    compile 'com.squareup.retrofit:retrofit:1.7.1'
+    compile 'com.netflix.rxjava:rxjava-core:0.17.6'
+    compile 'com.netflix.rxjava:rxjava-android:0.17.6'
+    compile project(path: ':imkit')
 }

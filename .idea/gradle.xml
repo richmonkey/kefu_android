@@ -10,12 +10,18 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/im/asynctcp" />
+            <option value="$PROJECT_DIR$/im/imkit" />
+            <option value="$PROJECT_DIR$/im/imsdk" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/im/asynctcp" />
+            <option value="$PROJECT_DIR$/im/imkit" />
+            <option value="$PROJECT_DIR$/im/imsdk" />
           </set>
         </option>
       </GradleProjectSettings>

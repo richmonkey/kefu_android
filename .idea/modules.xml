@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/im/asynctcp/asynctcp.iml" filepath="$PROJECT_DIR$/im/asynctcp/asynctcp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/im/imkit/imkit.iml" filepath="$PROJECT_DIR$/im/imkit/imkit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/im/imsdk/imsdk.iml" filepath="$PROJECT_DIR$/im/imsdk/imsdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/kefu_android.iml" filepath="$PROJECT_DIR$/kefu_android.iml" />
     </modules>
   </component>
