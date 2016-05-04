@@ -37,15 +37,15 @@ public class Application extends android.app.Application {
         FileCache fc = FileCache.getInstance();
         fc.setDir(this.getDir("cache", MODE_PRIVATE));
 
-
-
-
         IMService im = IMService.getInstance();
         //im.setHost(Config.SDK_IM_HOST);
         String androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
 
         im.setDeviceID(androidID);
+
+        long APPID = 1670;//debug 1453
+        im.setAppID(APPID);
         im.setCustomerMessageHandler(CustomerSupportMessageHandler.getInstance());
         im.registerConnectivityChangeReceiver(getApplicationContext());
     }
