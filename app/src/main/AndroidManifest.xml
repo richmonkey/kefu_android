@@ -27,7 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity"></activity>
+
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/login">
+        </activity>
 
         <activity
             android:name=".MessageListActivity"
@@ -36,6 +40,7 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".CustomerSupportMessageActivity"
             android:exported="true"
@@ -45,7 +50,9 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity android:name=".SettingActivity"></activity>
+
+        <activity android:name=".SettingActivity"
+            android:label="@string/setting"></activity>
 
 
         <activity
