@@ -6,6 +6,9 @@ public class User {
     public long uid;
     public String name;
     public String avatarURL;
+    public int timestamp;
+    //name为nil时，界面显示identifier字段,未被保存
+    public String identifier;
 
     public static void save(User user) {
         LevelDB db = LevelDB.getDefaultDB();
@@ -19,6 +22,9 @@ public class User {
             key = String.format("%s_avatar", prefix);
             String avatar = user.avatarURL != null ? user.avatarURL : "";
             db.set(key, avatar);
+
+            key = String.format("%s_timestamp", prefix);
+            db.setLong(key, user.timestamp);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -39,6 +45,8 @@ public class User {
             key = String.format("%s_avatar", prefix);
             u.avatarURL = db.get(key);
 
+            key = String.format("%s_timestamp", prefix);
+            u.timestamp = (int)db.getLong(key);
             return u;
         } catch (Exception e) {
             return null;

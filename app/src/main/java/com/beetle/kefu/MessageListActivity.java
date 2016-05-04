@@ -24,6 +24,9 @@ import com.beetle.im.CustomerMessageObserver;
 import com.beetle.im.IMService;
 import com.beetle.im.IMServiceObserver;
 import com.beetle.bauhinia.tools.Notification;
+import com.beetle.kefu.api.APIService;
+import com.beetle.kefu.model.User;
+import com.beetle.kefu.api.Customer;
 import com.beetle.kefu.model.NewCount;
 import com.beetle.kefu.model.Token;
 import com.squareup.otto.Bus;
@@ -35,6 +38,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 
 public class MessageListActivity extends MainActivity implements IMServiceObserver,
@@ -190,6 +198,17 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
                 });
             } else {
                 conv.setName(u.name);
+                //超过一天,从服务器更新用户名
+                if (now() - u.timestamp > 24*3600) {
+                    final Conversation fconv = conv;
+                    asyncGetUser(cc.customerAppID, cc.customerID, new GetUserCallback() {
+                        @Override
+                        public void onUser(User u) {
+                            fconv.setName(u.name);
+                            fconv.setAvatar(u.avatarURL);
+                        }
+                    });
+                }
             }
             conv.setAvatar(u.avatarURL);
         }
@@ -229,14 +248,6 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         Collections.sort(conversations, cmp);
     }
 
-    public static class User {
-        public long uid;
-        public String name;
-        public String avatarURL;
-
-        //name为nil时，界面显示identifier字段
-        public String identifier;
-    }
 
 
 
@@ -330,39 +341,46 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         }
     }
 
-
-    public boolean canBack() {
-        return false;
-    }
-
     protected User getUser(long appid, long uid) {
-        User u = new User();
-        u.uid = uid;
-        u.name = null;
-        u.avatarURL = "";
-        u.identifier = String.format("匿名(%d)", uid);
+        User u = User.load(appid, uid);
+        if (u == null) {
+            u = new User();
+            u.appID = appid;
+            u.uid = uid;
+            u.name = null;
+            u.avatarURL = "";
+            u.identifier = String.format("匿名(%d)", uid);
+        } else if (TextUtils.isEmpty(u.name)){
+            u.identifier = String.format("匿名(%d)", uid);
+        }
         return u;
     }
 
 
-    protected void asyncGetUser(long appid, long uid, GetUserCallback cb) {
-        final long fuid = uid;
-        final GetUserCallback fcb = cb;
-        new AsyncTask<Void, Integer, User>() {
-            @Override
-            protected User doInBackground(Void... urls) {
-                User u = new User();
-                u.uid = fuid;
-                u.name = String.format("匿名(%d)", fuid);
-                u.avatarURL = "";
-                u.identifier = String.format("匿名(%d)", fuid);
-                return u;
-            }
-            @Override
-            protected void onPostExecute(User result) {
-                fcb.onUser(result);
-            }
-        }.execute();
+    protected void asyncGetUser(final long appid, final long uid, final GetUserCallback cb) {
+        Customer api = APIService.getCustomerService();
+
+        api.getCustomer(appid, uid).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Customer.User>() {
+                    @Override
+                    public void call(Customer.User user) {
+                        Log.i(TAG, "user name:" + user.name);
+                        User u = new User();
+                        u.appID = appid;
+                        u.uid = uid;
+                        u.name = user.name;
+                        u.timestamp = now();
+                        if (!TextUtils.isEmpty(u.name)) {
+                            User.save(u);
+                            cb.onUser(u);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.i(TAG, "get customer error:" + throwable);
+                    }
+                });
     }
 
     protected void onCustomerServiceClick(Conversation conv) {

@@ -42,7 +42,7 @@ public class LoginActivity extends ActionBarActivity {
         u.password = password;
 
         Authorization api = APIService.getAuthoriation();
-        api.getAccessToken(u) .observeOn(AndroidSchedulers.mainThread())
+        api.getAccessToken(u).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Authorization.AccessToken>() {
                     @Override
                     public void call(Authorization.AccessToken token) {

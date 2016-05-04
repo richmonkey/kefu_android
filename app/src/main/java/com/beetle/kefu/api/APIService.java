@@ -1,5 +1,8 @@
 package com.beetle.kefu.api;
 
+import android.text.TextUtils;
+
+import com.beetle.kefu.model.Token;
 import com.google.gson.Gson;
 
 import retrofit.RequestInterceptor;
@@ -22,8 +25,28 @@ public class APIService {
         return adapter.create(Authorization.class);
     }
 
+    private static Customer newCustomer() {
+        RestAdapter adapter = new RestAdapter.Builder()
+                .setEndpoint(API_URL)
+                .setConverter(new GsonConverter(new Gson()))
+                .setRequestInterceptor(new RequestInterceptor() {
+                    @Override
+                    public void intercept(RequestFacade request) {
+                        Token t = Token.getInstance();
+                        if (!TextUtils.isEmpty(t.accessToken)) {
+                            request.addHeader("Authorization", "Bearer " + t.accessToken);
+                        }
+                    }
+                })
+                .build();
+
+        return adapter.create(Customer.class);
+    }
+
+
     static final Object monitor = new Object();
     static Authorization authorization;
+    static Customer customer;
 
     public static Authorization getAuthoriation() {
         if (authorization == null) {
@@ -34,5 +57,16 @@ public class APIService {
             }
         }
         return authorization;
+    }
+
+    public static Customer getCustomerService() {
+        if (customer == null) {
+            synchronized (monitor) {
+                if (customer == null) {
+                    customer = newCustomer();
+                }
+            }
+        }
+        return customer;
     }
 }
