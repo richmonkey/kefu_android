@@ -1,7 +1,6 @@
 package com.beetle.kefu;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,9 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import android.support.v7.widget.Toolbar;
 
-import com.beetle.bauhinia.api.IMHttpAPI;
 import com.beetle.bauhinia.db.Conversation;
 import com.beetle.bauhinia.db.ConversationIterator;
 import com.beetle.bauhinia.db.ICustomerMessage;
@@ -39,8 +36,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
@@ -86,9 +81,6 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
     // 初始化组件
     private void initWidget() {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.support_toolbar);
-        setSupportActionBar(toolbar);
-
         lv = (ListView) findViewById(R.id.list);
         adapter = new ConversationAdapter();
         lv.setAdapter(adapter);
