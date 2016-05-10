@@ -46,6 +46,7 @@ public class MainActivity extends BaseActivity {
 
         IMHttpAPI.setToken(token.accessToken);
         IMService im =  IMService.getInstance();
+        im.setUID(token.uid);
         im.setToken(token.accessToken);
         im.start();
 
