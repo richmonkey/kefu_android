@@ -487,6 +487,44 @@ public class CustomerSupportMessageActivity extends MessageActivity
     }
 
 
+    @Override
+    protected void onRobotClick() {
+        Log.i(TAG, "on robot click");
+
+        if (messages.size() == 0) {
+            return;
+        }
+
+        String question = "";
+        for (int i = messages.size() - 1; i > 0; i--) {
+            IMessage m = messages.get(i);
+            IMessage.MessageType msgType = m.content.getType();
+            if (!m.isOutgoing & msgType == IMessage.MessageType.MESSAGE_TEXT) {
+                question = ((IMessage.Text) m.content).text;
+                break;
+            }
+        }
+
+        if (TextUtils.isEmpty(question)) {
+            return;
+        }
+
+        Intent intent = new Intent(this, RobotActivity.class);
+        intent.putExtra("question", question);
+        startActivityForResult(intent, 1);
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK ) {
+            String answer = data.getExtras().getString("answer");
+            if (!TextUtils.isEmpty(answer)) {
+                sendTextMessage(answer);
+            }
+        }
+    }
+
 
     protected void sendTextMessage(String text) {
         if (text.length() == 0) {

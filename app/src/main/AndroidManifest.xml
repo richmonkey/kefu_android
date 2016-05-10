@@ -27,17 +27,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".LoginActivity"
-            android:label="@string/login">
-        </activity>
-
+            android:label="@string/login"></activity>
         <activity
             android:name=".MessageListActivity"
-            android:label="@string/app_name">
-        </activity>
-
+            android:label="@string/app_name"></activity>
         <activity
             android:name=".CustomerSupportMessageActivity"
             android:exported="true"
@@ -47,44 +42,33 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".SettingActivity"
-            android:label="@string/setting"></activity>
-
-
+        <activity
+            android:name=".SettingActivity"
+            android:label="@string/setting" />
         <activity
             android:name="com.beetle.bauhinia.MapActivity"
             android:label="位置"
-            android:theme="@style/imkit.ActionBar">
-        </activity>
+            android:theme="@style/imkit.ActionBar"></activity>
         <activity
             android:name="com.beetle.bauhinia.LocationPickerActivity"
             android:label="位置"
-            android:theme="@style/imkit.ActionBar">
-        </activity>
-
+            android:theme="@style/imkit.ActionBar"></activity>
         <activity
             android:name="com.beetle.bauhinia.WebActivity"
             android:label=""
-            android:theme="@style/imkit.ActionBar">
-        </activity>
-
+            android:theme="@style/imkit.ActionBar"></activity>
         <activity
             android:name="com.beetle.bauhinia.gallery.ui.GalleryGridUI"
             android:label="@string/gallery_chat_files"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/imkit.ActionBar">
-        </activity>
-
+            android:theme="@style/imkit.ActionBar"></activity>
         <activity
             android:name="com.beetle.bauhinia.gallery.ui.GalleryUI"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/imkit.NoActionBar">
-        </activity>
-
-
+            android:theme="@style/imkit.NoActionBar"></activity>
+        <activity android:name=".RobotActivity"></activity>
     </application>
 
 </manifest>

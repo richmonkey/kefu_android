@@ -43,10 +43,30 @@ public class APIService {
         return adapter.create(Customer.class);
     }
 
+    private static Robot newRobot() {
+        RestAdapter adapter = new RestAdapter.Builder()
+                .setEndpoint(API_URL)
+                .setConverter(new GsonConverter(new Gson()))
+                .setRequestInterceptor(new RequestInterceptor() {
+                    @Override
+                    public void intercept(RequestFacade request) {
+                        Token t = Token.getInstance();
+                        if (!TextUtils.isEmpty(t.accessToken)) {
+                            request.addHeader("Authorization", "Bearer " + t.accessToken);
+                        }
+                    }
+                })
+                .build();
+
+        return adapter.create(Robot.class);
+    }
+
+
 
     static final Object monitor = new Object();
     static Authorization authorization;
     static Customer customer;
+    static Robot robot;
 
     public static Authorization getAuthoriation() {
         if (authorization == null) {
@@ -68,5 +88,16 @@ public class APIService {
             }
         }
         return customer;
+    }
+
+    public static Robot getRobotService() {
+        if (robot == null) {
+            synchronized (monitor) {
+                if (robot == null) {
+                    robot = newRobot();
+                }
+            }
+        }
+        return robot;
     }
 }
