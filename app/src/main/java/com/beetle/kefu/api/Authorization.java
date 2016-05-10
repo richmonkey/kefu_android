@@ -11,6 +11,9 @@ import retrofit.http.POST;
 import rx.Observable;
 
 public interface Authorization {
+
+    int PLATFORM_ANDROID = 2;
+
     @POST("/auth/token")
     Observable<AccessToken> getAccessToken(@Body User user);
 
@@ -21,6 +24,13 @@ public interface Authorization {
     public class User {
         public String username;
         public String password;
+
+        @SerializedName("device_id")
+        public String deviceID;
+        @SerializedName("device_name")
+        public String deviceName;
+
+        public int platform;
     }
 
     public class RefreshToken {

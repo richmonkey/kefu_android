@@ -18,6 +18,7 @@ public class Token {
     public long uid;
     public long storeID;
     public String name;
+    public int loginTimestamp;
 
     public void save() {
         LevelDB db = LevelDB.getDefaultDB();
@@ -28,6 +29,7 @@ public class Token {
             db.setLong("token_uid", uid);
             db.setLong("token_store_id", storeID);
             db.set("token_name", name);
+            db.setLong("token_login", loginTimestamp);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -42,6 +44,7 @@ public class Token {
             uid = db.getLong("token_uid");
             name = db.get("token_name");
             storeID = db.getLong("token_store_id");
+            loginTimestamp = (int)db.getLong("token_login");
         } catch(Exception e) {
             e.printStackTrace();
         }

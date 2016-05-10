@@ -1,6 +1,8 @@
 package com.beetle.kefu;
 
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -9,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.beetle.bauhinia.db.ICustomerMessage;
 import com.beetle.kefu.api.APIService;
 import com.beetle.kefu.api.Authorization;
 import com.beetle.kefu.model.Token;
@@ -34,12 +35,25 @@ public class LoginActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        Intent intent = getIntent();
+        boolean hint = intent.getBooleanExtra("hint", false);
+        if (hint) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("你的账号在其它设备上登录");
+            builder.setNegativeButton("确定", null);
+            builder.show();
+        }
     }
 
     void login(String username, String password) {
+        String androidID = Settings.Secure.getString(this.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
         Authorization.User u = new Authorization.User();
         u.username = username;
         u.password = password;
+        u.deviceName = String.format("%s-%s", android.os.Build.BRAND, android.os.Build.MODEL);
+        u.deviceID = androidID;
+        u.platform = Authorization.PLATFORM_ANDROID;
 
         Authorization api = APIService.getAuthoriation();
         api.getAccessToken(u).observeOn(AndroidSchedulers.mainThread())
@@ -54,6 +68,7 @@ public class LoginActivity extends ActionBarActivity {
                         t.storeID = token.storeID;
                         t.uid = token.uid;
                         t.name = token.name;
+                        t.loginTimestamp = now();
                         t.save();
 
                         Intent intent = new Intent(LoginActivity.this, MessageListActivity.class);

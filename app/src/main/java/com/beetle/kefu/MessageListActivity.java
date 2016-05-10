@@ -2,6 +2,7 @@ package com.beetle.kefu;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -21,11 +22,20 @@ import com.beetle.im.CustomerMessageObserver;
 import com.beetle.im.IMService;
 import com.beetle.im.IMServiceObserver;
 import com.beetle.bauhinia.tools.Notification;
+import com.beetle.im.SystemMessageObserver;
 import com.beetle.kefu.api.APIService;
+import com.beetle.kefu.api.Authorization;
 import com.beetle.kefu.model.User;
 import com.beetle.kefu.api.Customer;
 import com.beetle.kefu.model.NewCount;
 import com.beetle.kefu.model.Token;
+import com.google.gson.JsonObject;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -42,6 +52,7 @@ import rx.functions.Action1;
 
 public class MessageListActivity extends MainActivity implements IMServiceObserver,
         CustomerMessageObserver,
+        SystemMessageObserver,
         AdapterView.OnItemClickListener,
         NotificationCenter.NotificationCenterObserver {
     private static final String TAG = "beetle";
@@ -119,6 +130,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         IMService im =  IMService.getInstance();
         im.addObserver(this);
         im.addCustomerServiceObserver(this);
+        im.addSystemObserver(this);
 
         loadConversations();
         initWidget();
@@ -138,6 +150,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         IMService im =  IMService.getInstance();
         im.removeObserver(this);
         im.removeCustomerServiceObserver(this);
+        im.removeSystemObserver(this);
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
         nc.removeObserver(this);
@@ -484,5 +497,72 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
     @Override
     public void onCustomerMessageFailure(CustomerMessage msg) {
         Log.i(TAG, "on customer message failure");
+    }
+
+    @Override
+    public void onSystemMessage(String sm) {
+        Gson gson = new GsonBuilder().create();
+        JsonObject element = gson.fromJson(sm, JsonObject.class);
+
+        if (!element.has("login")) {
+            return;
+        }
+
+        JsonObject obj = element.getAsJsonObject("login");
+        int platform = 0;
+        int timestamp = 0;
+        String deviceID = "";
+        String deviceName = "";
+        if (obj.has("platform")) {
+            platform = obj.getAsJsonPrimitive("platform").getAsInt();
+        }
+        if (obj.has("timestamp")) {
+            timestamp = obj.getAsJsonPrimitive("timestamp").getAsInt();
+        }
+
+        if (obj.has("device_id")) {
+            deviceID = obj.getAsJsonPrimitive("device_id").getAsString();
+        }
+
+        if (obj.has("device_name")) {
+            deviceName = obj.getAsJsonPrimitive("device_name").getAsString();
+        }
+
+        Token t = Token.getInstance();
+
+        String androidID = Settings.Secure.getString(this.getContentResolver(),
+                Settings.Secure.ANDROID_ID);
+        if (platform == Authorization.PLATFORM_ANDROID && deviceID.equals(androidID)) {
+            return;
+        }
+
+        if (t.loginTimestamp > timestamp) {
+            return;
+        }
+
+        Log.i(TAG, "login another place");
+        logout();
+    }
+
+    void logout() {
+        Token t = Token.getInstance();
+        t.uid = 0;
+        t.storeID = 0;
+        t.name = "";
+        t.accessToken = "";
+        t.refreshToken = "";
+        t.expireTimestamp = 0;
+        t.loginTimestamp = 0;
+        t.save();
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("hint", true);
+        startActivity(intent);
+
+        Bus bus = BusCenter.getBus();
+        bus.post(new BusCenter.Logout());
+
+        finish();
     }
 }
