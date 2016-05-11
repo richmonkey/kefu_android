@@ -140,8 +140,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         nc.addObserver(this, CustomerSupportMessageActivity.CLEAR_MESSAGES);
         nc.addObserver(this, CustomerSupportMessageActivity.CLEAR_NEW_MESSAGES);
 
-        Bus bus = BusCenter.getBus();
-        bus.register(this);
+
     }
 
     @Override
@@ -154,16 +153,12 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
         nc.removeObserver(this);
-        BusCenter.getBus().unregister(this);
+
         Log.i(TAG, "message list activity destroyed");
     }
 
 
-    @Subscribe
-    public void onLogout(BusCenter.Logout e) {
-        Log.i(TAG, "message list activity logout...");
-        finish();
-    }
+
 
 
     public  String messageContentToString(IMessage.MessageContent content) {

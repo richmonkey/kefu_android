@@ -14,4 +14,8 @@ public class BusCenter {
     public static class Logout {
 
     }
+
+    public static class XMDeviceToken {
+        public String token;
+    }
 }

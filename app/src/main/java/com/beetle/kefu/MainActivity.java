@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.beetle.bauhinia.api.IMHttpAPI;
+import com.beetle.bauhinia.api.body.PostDeviceToken;
 import com.beetle.im.IMService;
 import com.beetle.im.Timer;
 import com.beetle.kefu.api.APIService;
@@ -12,6 +13,7 @@ import com.beetle.kefu.api.Authorization;
 import com.beetle.kefu.model.Token;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import com.xiaomi.mipush.sdk.MiPushClient;
 
 import java.io.File;
 import java.util.Date;
@@ -28,7 +30,56 @@ public class MainActivity extends BaseActivity {
 
     private final static String TAG = "kefu";
 
+    private String xmDeviceToken;
     private Timer refreshTokenTimer;
+
+    private Object listener = new Object() {
+        @Subscribe
+        public void onLogout(BusCenter.Logout e) {
+            Log.i(TAG, "MainActivity logout...");
+            if (!TextUtils.isEmpty(MainActivity.this.xmDeviceToken)) {
+                PostDeviceToken t = new PostDeviceToken();
+                t.xmDeviceToken = MainActivity.this.xmDeviceToken;
+                IMHttpAPI.Singleton().unBindDeviceToken(t)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<Object>() {
+                            @Override
+                            public void call(Object o) {
+                                Log.i(TAG, "unbind token success");
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                Log.i(TAG, "unbind token error:" + throwable);
+                            }
+                        });
+
+            }
+
+            MainActivity.this.finish();
+        }
+
+        @Subscribe
+        public void onXMDeviceToken(BusCenter.XMDeviceToken token) {
+            PostDeviceToken t = new PostDeviceToken();
+            t.xmDeviceToken = token.token;
+            IMHttpAPI.Singleton().bindDeviceToken(t)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Object>() {
+                        @Override
+                        public void call(Object o) {
+                            Log.i(TAG, "bind token success");
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Log.i(TAG, "bind token error:" + throwable);
+                        }
+                    });
+
+            MainActivity.this.xmDeviceToken = token.token;
+        }
+    };;
 
     @Override
     protected  void onCreate(Bundle savedInstanceState) {
@@ -57,6 +108,20 @@ public class MainActivity extends BaseActivity {
             int t = Token.getInstance().expireTimestamp - 60 - now;
             refreshTokenDelay(t);
         }
+
+        initXiaomiPush();
+
+        Bus bus = BusCenter.getBus();
+        bus.register(listener);
+
+    }
+
+    private void initXiaomiPush() {
+        // 注册push服务，注册成功后会向XiaomiPushReceiver发送广播
+        // 可以从onCommandResult方法中MiPushCommandMessage对象参数中获取注册信息
+        String appId = "2882303761517469469";
+        String appKey = "5761746957469";
+        MiPushClient.registerPush(this, appId, appKey);
     }
 
     public static int getNow() {
@@ -146,6 +211,8 @@ public class MainActivity extends BaseActivity {
         IMService im = IMService.getInstance();
         im.stop();
 
+        BusCenter.getBus().unregister(listener);
     }
+
 
 }
