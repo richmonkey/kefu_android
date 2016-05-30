@@ -33,6 +33,9 @@ import com.amap.api.services.geocoder.GeocodeSearch;
 import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
 
+import com.beetle.bauhinia.api.IMHttpAPI;
+import com.beetle.bauhinia.api.types.Image;
+import com.beetle.bauhinia.api.types.Translation;
 import com.beetle.bauhinia.db.IMessage;
 import com.beetle.bauhinia.db.MessageIterator;
 import com.beetle.bauhinia.gallery.GalleryImage;
@@ -67,6 +70,9 @@ import com.beetle.bauhinia.activity.PhotoActivity;
 import com.beetle.bauhinia.ChatItemQuickAction.ChatQuickAction;
 import static com.beetle.bauhinia.constant.RequestCodes.*;
 import com.beetle.imkit.R;
+
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 
 public class MessageActivity extends BaseActivity implements
@@ -288,6 +294,7 @@ public class MessageActivity extends BaseActivity implements
         public static int NOTIFICATION = 10;
         public static int LINK = 12;
         public static int TIMEBASE = 14;
+        public static int GOODS = 16;
     }
 
     class ChatAdapter extends BaseAdapter implements ContentTypes {
@@ -332,6 +339,8 @@ public class MessageActivity extends BaseActivity implements
                 media = TIMEBASE;
             } else if (msg.content instanceof IMessage.Link) {
                 media = LINK;
+            } else if (msg.content instanceof IMessage.Goods) {
+                media = GOODS;
             } else {
                 media = UNKNOWN;
             }
@@ -343,7 +352,7 @@ public class MessageActivity extends BaseActivity implements
 
         @Override
         public int getViewTypeCount() {
-            return 16;
+            return 18;
         }
 
         @Override
@@ -374,6 +383,9 @@ public class MessageActivity extends BaseActivity implements
                     case MESSAGE_LINK:
                         rowView = new MessageLinkView(MessageActivity.this, !msg.isOutgoing, isShowUserName);
                         break;
+                    case MESSAGE_GOODS:
+                        rowView = new MessageGoodsView(MessageActivity.this);
+                        break;
                     default:
                         rowView = new MessageTextView(MessageActivity.this, !msg.isOutgoing, isShowUserName);
                         break;
@@ -402,6 +414,7 @@ public class MessageActivity extends BaseActivity implements
 
                             if (im.content.getType() == IMessage.MessageType.MESSAGE_TEXT) {
                                 actions.add(ChatItemQuickAction.ChatQuickAction.COPY);
+                                actions.add(ChatItemQuickAction.ChatQuickAction.TRANSLATE);
                             }
 
                             if (actions.size() == 0) {
@@ -423,6 +436,9 @@ public class MessageActivity extends BaseActivity implements
                                                     break;
                                                 case RESEND:
                                                     MessageActivity.this.resend(im);
+                                                    break;
+                                                case TRANSLATE:
+                                                    MessageActivity.this.translate(im);
                                                     break;
                                                 default:
                                                     break;
@@ -459,6 +475,30 @@ public class MessageActivity extends BaseActivity implements
         eraseMessageFailure(msg);
         msg.setFailure(false);
         this.sendMessage(msg);
+    }
+
+    void translate(final IMessage msg) {
+        IMessage.Text textContent = (IMessage.Text)msg.content;
+
+        IMHttpAPI.Singleton().translate(textContent.text, "en")
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Translation>() {
+                    @Override
+                    public void call(Translation t) {
+                        Log.i(TAG, "translate reulst:" + t.translation);
+                        if (!TextUtils.isEmpty(t.translation)) {
+                            saveMessageTranslation(msg, t.translation);
+                            msg.setTranslation(t.translation);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.i(TAG, "translate err:" + throwable);
+                    }
+                });;
+
     }
 
     private class VolumeTimerTask extends TimerTask {
@@ -692,6 +732,10 @@ public class MessageActivity extends BaseActivity implements
     }
 
     protected void saveMessageAttachment(IMessage msg, String address) {
+        Log.i(TAG, "not implemented");
+    }
+
+    protected void saveMessageTranslation(IMessage msg, String translation) {
         Log.i(TAG, "not implemented");
     }
 
@@ -964,6 +1008,12 @@ public class MessageActivity extends BaseActivity implements
             intent.putExtra("url", link.url);
             intent.setClass(this, WebActivity.class);
             startActivity(intent);
+        } else if (message.content.getType() == IMessage.MessageType.MESSAGE_GOODS) {
+            IMessage.Goods link = (IMessage.Goods)message.content;
+            Intent intent = new Intent();
+            intent.putExtra("url", link.url);
+            intent.setClass(this, WebActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -1033,6 +1083,11 @@ public class MessageActivity extends BaseActivity implements
 
             if (TextUtils.isEmpty(loc.address)) {
                 queryLocation(msg);
+            }
+        } else if (msg.content.getType() == IMessage.MessageType.MESSAGE_TEXT) {
+            IMessage.Attachment attachment = attachments.get(msg.msgLocalID);
+            if (attachment != null) {
+                msg.setTranslation(attachment.translation);
             }
         }
     }

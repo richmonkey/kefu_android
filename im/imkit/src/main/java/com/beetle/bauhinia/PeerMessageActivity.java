@@ -37,6 +37,7 @@ public class PeerMessageActivity extends MessageActivity implements
 
     public static final String SEND_MESSAGE_NAME = "send_message";
     public static final String CLEAR_MESSAGES = "clear_messages";
+    public static final String CLEAR_NEW_MESSAGES = "clear_new_messages";
 
     private final int PAGE_SIZE = 10;
 
@@ -91,6 +92,11 @@ public class PeerMessageActivity extends MessageActivity implements
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "peer message activity destory");
+
+        NotificationCenter nc = NotificationCenter.defaultCenter();
+        Notification notification = new Notification(this.receiver, CLEAR_NEW_MESSAGES);
+        nc.postNotification(notification);
+
         PeerOutbox.getInstance().removeObserver(this);
         IMService.getInstance().removeObserver(this);
         IMService.getInstance().removePeerObserver(this);
@@ -152,6 +158,7 @@ public class PeerMessageActivity extends MessageActivity implements
 
             if (msg.content.getType() == IMessage.MessageType.MESSAGE_ATTACHMENT) {
                 IMessage.Attachment attachment = (IMessage.Attachment)msg.content;
+                Log.i(TAG, "attachment:" + attachment.translation + "," + attachment.address);
                 attachments.put(attachment.msg_id, attachment);
             } else{
                 msg.isOutgoing = (msg.sender == currentUID);
@@ -213,6 +220,7 @@ public class PeerMessageActivity extends MessageActivity implements
         imsg.sender = msg.sender;
         imsg.receiver = msg.receiver;
         imsg.setContent(msg.content);
+        imsg.isOutgoing = (msg.sender == this.currentUID);
 
         downloadMessageContent(imsg);
 
@@ -303,6 +311,15 @@ public class PeerMessageActivity extends MessageActivity implements
     protected void saveMessageAttachment(IMessage msg, String address) {
         IMessage attachment = new IMessage();
         attachment.content = IMessage.newAttachment(msg.msgLocalID, address);
+        attachment.sender = msg.sender;
+        attachment.receiver = msg.receiver;
+        saveMessage(attachment);
+    }
+
+    @Override
+    protected void saveMessageTranslation(IMessage msg, String translation) {
+        IMessage attachment = new IMessage();
+        attachment.content = IMessage.newTranslationAttachment(msg.msgLocalID, translation);
         attachment.sender = msg.sender;
         attachment.receiver = msg.receiver;
         saveMessage(attachment);

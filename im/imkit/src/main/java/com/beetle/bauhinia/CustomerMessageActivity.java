@@ -21,6 +21,7 @@ import com.beetle.bauhinia.db.MessageIterator;
 import com.beetle.bauhinia.tools.FileCache;
 import com.beetle.im.IMService;
 import com.beetle.im.IMServiceObserver;
+import com.google.gson.JsonObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -37,6 +38,8 @@ public class CustomerMessageActivity extends MessageActivity
         CustomerOutbox.OutboxObserver {
     public static final String SEND_MESSAGE_NAME = "send_cs_message";
     public static final String CLEAR_MESSAGES = "clear_cs_messages";
+    public static final String CLEAR_NEW_MESSAGES = "clear_cs_new_messages";
+
 
     private final int PAGE_SIZE = 10;
 
@@ -120,7 +123,27 @@ public class CustomerMessageActivity extends MessageActivity
         this.isShowUserName = intent.getBooleanExtra("show_name", false);
 
 
+        String goodsImage = intent.getStringExtra("goods_image");
+        String goodsTitle = intent.getStringExtra("goods_title");
+        String goodsDesc = intent.getStringExtra("goods_description");
+        String goodsURL = intent.getStringExtra("goods_url");
+
         this.loadConversationData();
+
+        if (!TextUtils.isEmpty(goodsImage) && !TextUtils.isEmpty(goodsTitle) &&
+                !TextUtils.isEmpty(goodsDesc) && !TextUtils.isEmpty(goodsURL)) {
+            IMessage goodsMsg = new IMessage();
+            JsonObject content = new JsonObject();
+            JsonObject goodsJson = new JsonObject();
+            goodsJson.addProperty("image", goodsImage);
+            goodsJson.addProperty("url", goodsURL);
+            goodsJson.addProperty("title", goodsTitle);
+            goodsJson.addProperty("content", goodsDesc);
+            content.add("goods", goodsJson);
+            goodsMsg.setContent(content.toString());
+            goodsMsg.timestamp = now();
+            messages.add(goodsMsg);
+        }
         if (!TextUtils.isEmpty(peerName)) {
             titleView.setText(peerName);
         }
@@ -135,6 +158,10 @@ public class CustomerMessageActivity extends MessageActivity
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "peer message activity destory");
+
+        NotificationCenter nc = NotificationCenter.defaultCenter();
+        Notification notification = new Notification(this.storeID, CLEAR_NEW_MESSAGES);
+        nc.postNotification(notification);
 
         CustomerOutbox.getInstance().removeObserver(this);
         IMService.getInstance().removeObserver(this);
@@ -380,7 +407,16 @@ public class CustomerMessageActivity extends MessageActivity
     }
 
     @Override
-    protected void saveMessage(IMessage imsg) {
+    void saveMessageTranslation(IMessage msg, String translation) {
+        ICustomerMessage attachment = new ICustomerMessage();
+        attachment.content = IMessage.newTranslationAttachment(msg.msgLocalID, translation);
+        attachment.sender = msg.sender;
+        attachment.receiver = msg.receiver;
+        saveMessage(attachment);
+    }
+
+    @Override
+    void saveMessage(IMessage imsg) {
         CustomerMessageDB.getInstance().insertMessage(imsg, storeID);
     }
 
@@ -399,6 +435,10 @@ public class CustomerMessageActivity extends MessageActivity
         super.clearConversation();
         CustomerMessageDB db = CustomerMessageDB.getInstance();
         db.clearCoversation(this.storeID);
+
+        NotificationCenter nc = NotificationCenter.defaultCenter();
+        Notification notification = new Notification(this.storeID, clearNotificationName);
+        nc.postNotification(notification);
     }
 
     @Override
