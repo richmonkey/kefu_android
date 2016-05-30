@@ -14,7 +14,10 @@ import retrofit.converter.GsonConverter;
  */
 public class APIService {
 
-    public static final String API_URL = "http://api.kefu.gobelieve.io";
+//    public static final String API_URL = "http://api.kefu.91lace.com";
+
+    //
+    public static final String API_URL = "http://121.41.30.52:20003";
 
     private static Authorization newAuthorization() {
         RestAdapter adapter = new RestAdapter.Builder()

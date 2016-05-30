@@ -5,6 +5,7 @@ import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.beetle.bauhinia.api.IMHttpAPI;
 import com.beetle.bauhinia.tools.FileCache;
 import com.beetle.im.IMService;
 import com.google.code.p.leveldb.LevelDB;
@@ -38,13 +39,15 @@ public class Application extends android.app.Application {
         fc.setDir(this.getDir("cache", MODE_PRIVATE));
 
         IMService im = IMService.getInstance();
-        //im.setHost(Config.SDK_IM_HOST);
+
+        im.setHost("121.41.30.52");//imnode.91lace.com
+        IMHttpAPI.setAPIURL("http://121.41.30.52:20000");//api.im.91lace.com
         String androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
 
         im.setDeviceID(androidID);
 
-        long APPID = 1670;//debug 1453
+        long APPID = 17;
         im.setAppID(APPID);
         im.setCustomerMessageHandler(CustomerSupportMessageHandler.getInstance());
         im.registerConnectivityChangeReceiver(getApplicationContext());
