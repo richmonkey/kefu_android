@@ -28,6 +28,7 @@ public class IMessage {
     public static final String LINK = "link";
     public static final String ATTACHMENT = "attachment";
     public static final String TIMEBASE = "timebase";
+    public static final String GOODS = "goods";
 
     public static enum MessageType {
         MESSAGE_UNKNOWN,
@@ -38,6 +39,7 @@ public class IMessage {
         MESSAGE_GROUP_NOTIFICATION,
         MESSAGE_LINK,
         MESSAGE_ATTACHMENT,
+        MESSAGE_GOODS, //虚拟的消息，不会存入磁盘
         MESSAGE_TIME_BASE //虚拟的消息，不会存入磁盘
     }
 
@@ -98,6 +100,19 @@ public class IMessage {
         content.add(ATTACHMENT, attachmentJson);
         attachment.raw = content.toString();
         attachment.address = address;
+        attachment.msg_id = msgLocalID;
+        return attachment;
+    }
+
+    public static Attachment newTranslationAttachment(int msgLocalID, String translation) {
+        Attachment attachment = new Attachment();
+        JsonObject content = new JsonObject();
+        JsonObject attachmentJson = new JsonObject();
+        attachmentJson.addProperty("msg_id", msgLocalID);
+        attachmentJson.addProperty("translation", translation);
+        content.add(ATTACHMENT, attachmentJson);
+        attachment.raw = content.toString();
+        attachment.translation = translation;
         attachment.msg_id = msgLocalID;
         return attachment;
     }
@@ -240,9 +255,18 @@ public class IMessage {
         public MessageType getType() { return MessageType.MESSAGE_LINK; }
     }
 
+    public static class Goods extends MessageContent {
+        public String title;
+        public String content;
+        public String url;
+        public String image;
+        public MessageType getType() { return MessageType.MESSAGE_GOODS; }
+    }
+
     public static class Attachment extends MessageContent {
         public int msg_id;
         public String address;
+        public String translation;
 
         public MessageType getType() {
             return MessageType.MESSAGE_ATTACHMENT;
@@ -268,6 +292,8 @@ public class IMessage {
                 content = gson.fromJson(element.get(ATTACHMENT), Attachment.class);
             } else if (element.has(LINK)) {
                 content = gson.fromJson(element.get(LINK), Link.class);
+            } else if (element.has(GOODS)) {
+                content = gson.fromJson(element.get(GOODS), Goods.class);
             } else {
                 content = new Unknown();
             }
@@ -297,6 +323,7 @@ public class IMessage {
     private boolean playing;
     private boolean downloading;
     private boolean geocoding;
+    private String translation;//译文
 
     private PropertyChangeSupport changeSupport = new PropertyChangeSupport(
             this);
@@ -400,6 +427,14 @@ public class IMessage {
 
     public String getSenderAvatar() {
         return this.senderAvatar;
+    }
+
+    public String getTranslation() {
+        return this.translation;
+    }
+
+    public void setTranslation(String translation) {
+        this.translation = translation;
     }
 
 }
