@@ -127,10 +127,10 @@ public class MessageActivity extends BaseActivity implements
     static final int ITEM_LOCATION = 3;
     static final int ITEM_ROBOT = 4;
 
-    protected int[] itemStrings = { R.string.attach_take_pic, R.string.attach_picture, R.string.attach_location, R.string.attach_robot };
+    protected int[] itemStrings = { R.string.attach_take_pic, R.string.attach_picture, R.string.attach_location};
     protected int[] itemdrawables = { R.drawable.ease_chat_takepic_selector, R.drawable.ease_chat_image_selector,
-            R.drawable.ease_chat_location_selector, R.drawable.ease_chat_robot_selector };
-    protected int[] itemIds = { ITEM_TAKE_PICTURE, ITEM_PICTURE, ITEM_LOCATION, ITEM_ROBOT };
+            R.drawable.ease_chat_location_selector };
+    protected int[] itemIds = { ITEM_TAKE_PICTURE, ITEM_PICTURE, ITEM_LOCATION };
 
 
     protected MyItemClickListener extendMenuItemClickListener;
