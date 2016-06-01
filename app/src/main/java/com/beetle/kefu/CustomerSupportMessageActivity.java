@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.beetle.bauhinia.constant.RequestCodes.PICK_LOCATION;
+import static com.beetle.bauhinia.constant.RequestCodes.ROBOT;
+
 /**
  * Created by houxh on 16/5/3.
  */
@@ -511,13 +514,18 @@ public class CustomerSupportMessageActivity extends MessageActivity
 
         Intent intent = new Intent(this, RobotActivity.class);
         intent.putExtra("question", question);
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, ROBOT);
     }
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK ) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        if (requestCode == ROBOT) {
             String answer = data.getExtras().getString("answer");
             if (!TextUtils.isEmpty(answer)) {
                 sendTextMessage(answer);
