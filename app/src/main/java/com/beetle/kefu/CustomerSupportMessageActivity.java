@@ -384,6 +384,17 @@ public class CustomerSupportMessageActivity extends MessageActivity
         saveMessage(attachment);
     }
 
+
+    @Override
+    protected void saveMessageTranslation(IMessage msg, String translation) {
+        ICustomerMessage attachment = new ICustomerMessage();
+        attachment.content = IMessage.newTranslationAttachment(msg.msgLocalID, translation);
+        attachment.sender = msg.sender;
+        attachment.receiver = msg.receiver;
+        saveMessage(attachment);
+    }
+
+
     @Override
     protected void saveMessage(IMessage imsg) {
         CustomerSupportMessageDB.getInstance().insertMessage(imsg);
