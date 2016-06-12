@@ -172,6 +172,8 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
             return ((GroupNotification) content).description;
         } else if (content instanceof IMessage.Location) {
             return "一个地理位置";
+        } else if (content instanceof IMessage.Goods) {
+            return ((IMessage.Goods)content).title;
         } else {
             return content.getRaw();
         }
