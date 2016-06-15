@@ -2,6 +2,7 @@ package com.beetle.kefu;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -82,10 +83,13 @@ public class LoginActivity extends ActionBarActivity {
                     public void call(Throwable throwable) {
                         Log.i(TAG, "throwable:" + throwable);
                         RetrofitError error = (RetrofitError)throwable;
-                        Response resp = error.getResponse();
-                        Log.i(TAG, "reason:" + resp.getReason());
-                        Log.i(TAG, "resp:" + resp);
-                        Toast.makeText(getApplicationContext(), "登录失败", Toast.LENGTH_SHORT).show();
+                        if (error.getResponse() != null) {
+                            Authorization.Error e = (Authorization.Error) error.getBodyAs(Authorization.Error.class);
+                            Log.i(TAG, "error:" + e.error);
+                            Toast.makeText(getApplicationContext(), e.error, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "登录失败", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
     }
@@ -106,4 +110,10 @@ public class LoginActivity extends ActionBarActivity {
         login(name.getText().toString(), password.getText().toString());
     }
 
+    public void onRegister(View view) {
+        String url = "http://www.xiaowei.io";
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        startActivity(i);
+    }
 }

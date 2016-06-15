@@ -53,6 +53,11 @@ public interface Authorization {
         public int expires;
     }
 
+    public class Error {
+        @SerializedName("error")
+        public String error;
+    }
+
 }
 
 
