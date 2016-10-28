@@ -10,6 +10,7 @@ import com.beetle.im.IMService;
 import com.beetle.im.Timer;
 import com.beetle.kefu.api.APIService;
 import com.beetle.kefu.api.Authorization;
+import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.Token;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -86,9 +87,9 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         Token token = Token.getInstance();
-
+        Profile profile = Profile.getInstance();
         CustomerSupportMessageDB db = CustomerSupportMessageDB.getInstance();
-        File f = this.getDir("" + token.uid, MODE_PRIVATE);
+        File f = this.getDir("" + profile.uid, MODE_PRIVATE);
         File f2 = new File(f, "customer");
         f2.mkdir();
         db.setDir(f2);
@@ -97,7 +98,7 @@ public class MainActivity extends BaseActivity {
 
         IMHttpAPI.setToken(token.accessToken);
         IMService im =  IMService.getInstance();
-        im.setUID(token.uid);
+        im.setUID(profile.uid);
         im.setToken(token.accessToken);
         im.start();
 
@@ -145,11 +146,7 @@ public class MainActivity extends BaseActivity {
                         t.accessToken = token.accessToken;
                         t.refreshToken = token.refreshToken;
                         t.expireTimestamp = token.expires + getNow();
-                        if (!TextUtils.isEmpty(token.name)) {
-                            t.name = token.name;
-                        }
-                        t.save();
-
+                        t.save(MainActivity.this);
 
                         int ts = t.expireTimestamp - 60 - getNow();
                         if (ts <= 0) {

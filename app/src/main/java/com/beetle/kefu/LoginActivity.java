@@ -12,10 +12,15 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.beetle.bauhinia.db.ICustomerMessage;
+import com.beetle.bauhinia.db.IMessage;
+import com.beetle.bauhinia.db.MessageIterator;
 import com.beetle.kefu.api.APIService;
 import com.beetle.kefu.api.Authorization;
+import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.Token;
 
+import java.io.File;
 import java.util.Date;
 
 import retrofit.RetrofitError;
@@ -25,6 +30,9 @@ import rx.functions.Action1;
 
 public class LoginActivity extends ActionBarActivity {
     public static final String TAG = "kefu";
+
+
+
 
     public static int now() {
         Date date = new Date();
@@ -66,11 +74,17 @@ public class LoginActivity extends ActionBarActivity {
                         t.accessToken = token.accessToken;
                         t.refreshToken = token.refreshToken;
                         t.expireTimestamp = token.expires + now();
-                        t.storeID = token.storeID;
-                        t.uid = token.uid;
-                        t.name = token.name;
-                        t.loginTimestamp = now();
-                        t.save();
+                        t.save(LoginActivity.this);
+
+                        Profile profile = Profile.getInstance();
+                        profile.uid = token.uid;
+                        profile.name = token.name;
+                        profile.avatar = "";
+                        profile.storeID = token.storeID;
+                        profile.loginTimestamp = now();
+                        profile.save(LoginActivity.this);
+
+                        LoginActivity.this.insertWelcomeMessage();
 
                         Intent intent = new Intent(LoginActivity.this, MessageListActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -92,6 +106,45 @@ public class LoginActivity extends ActionBarActivity {
                         }
                     }
                 });
+    }
+
+    private void insertWelcomeMessage() {
+        Profile profile = Profile.getInstance();
+        CustomerSupportMessageDB db = CustomerSupportMessageDB.getInstance();
+        File f = this.getDir("" + profile.uid, MODE_PRIVATE);
+        File f2 = new File(f, "customer");
+        f2.mkdir();
+        db.setDir(f2);
+
+        MessageIterator iter = CustomerSupportMessageDB.getInstance().newMessageIterator(profile.uid, Config.XIAOWEI_APPID);
+
+        boolean exists = false;
+        while (iter != null) {
+            ICustomerMessage msg = (ICustomerMessage)iter.next();
+            if (msg == null) {
+                break;
+            }
+            exists = true;
+            break;
+        }
+
+        if (!exists) {
+            ICustomerMessage msg = new ICustomerMessage();
+            msg.customerID = profile.uid;
+            msg.customerAppID = Config.XIAOWEI_APPID;
+            msg.storeID = Config.XIAOWEI_STORE_ID;
+            msg.sellerID = 0;
+
+            msg.timestamp = now();
+            msg.sender = 0;
+            msg.receiver = profile.uid;
+
+            msg.isSupport = true;
+            msg.isOutgoing = false;
+
+            msg.setContent(IMessage.newText("欢迎你使用小微客服"));
+            CustomerSupportMessageDB.getInstance().insertMessage(msg);
+        }
     }
 
     public void onLogin(View view) {

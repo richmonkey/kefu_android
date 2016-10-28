@@ -804,7 +804,7 @@ public class IMService {
         ack.body = new Integer(msg.seq);
         sendMessage(ack);
 
-        if (this.appID > 0 && this.appID != cs.customerAppID && this.uid == cs.sellerID) {
+        if (this.appID > 0 && this.uid == cs.sellerID) {
             if (customerMessageHandler != null && !customerMessageHandler.handleMessageACK(cs)) {
                 Log.w(TAG, "handle customer service message ack fail");
                 return;

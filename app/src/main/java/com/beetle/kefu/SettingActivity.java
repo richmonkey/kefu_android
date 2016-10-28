@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.Token;
 import com.squareup.otto.Bus;
 
@@ -21,12 +22,12 @@ public class SettingActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
 
-        Token t = Token.getInstance();
+        Profile profile = Profile.getInstance();
         TextView numberTextView = (TextView)findViewById(R.id.number);
         TextView nameTextView = (TextView)findViewById(R.id.name);
-        numberTextView.setText(String.format("客服工号    %d", t.uid));
-        if (!TextUtils.isEmpty(t.name)) {
-            nameTextView.setText(String.format("客服姓名    %s", t.name));
+        numberTextView.setText(String.format("客服工号    %d", profile.uid));
+        if (!TextUtils.isEmpty(profile.name)) {
+            nameTextView.setText(String.format("客服姓名    %s", profile.name));
         }
     }
 
@@ -56,13 +57,19 @@ public class SettingActivity extends BaseActivity {
         Log.i(TAG, "logout");
 
         Token t = Token.getInstance();
-        t.uid = 0;
-        t.storeID = 0;
-        t.name = "";
         t.accessToken = "";
         t.refreshToken = "";
         t.expireTimestamp = 0;
-        t.save();
+        t.save(this);
+
+        Profile profile = Profile.getInstance();
+        profile.uid = 0;
+        profile.storeID = 0;
+        profile.status = "";
+        profile.name = "";
+        profile.avatar = "";
+        profile.loginTimestamp = 0;
+        profile.save(this);
 
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

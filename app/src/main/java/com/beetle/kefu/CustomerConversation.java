@@ -8,4 +8,6 @@ import com.beetle.bauhinia.db.Conversation;
 public class CustomerConversation extends Conversation {
     public long customerAppID;
     public long customerID;
+
+    public boolean isXiaoWei;
 }

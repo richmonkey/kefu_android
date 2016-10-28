@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.beetle.bauhinia.tools.FileCache;
 import com.beetle.im.IMService;
+import com.beetle.kefu.model.Profile;
+import com.beetle.kefu.model.Token;
 import com.google.code.p.leveldb.LevelDB;
 import com.squareup.otto.Bus;
 
@@ -29,6 +31,12 @@ public class Application extends android.app.Application {
         }
         Log.i(TAG, "app application create");
 
+        Token token = Token.getInstance();
+        token.load(this);
+
+        Profile profile = Profile.getInstance();
+        profile.load(this);
+
         LevelDB ldb = LevelDB.getDefaultDB();
         String dir = getFilesDir().getAbsoluteFile() + File.separator + "db";
         Log.i(TAG, "dir:" + dir);
@@ -38,14 +46,12 @@ public class Application extends android.app.Application {
         fc.setDir(this.getDir("cache", MODE_PRIVATE));
 
         IMService im = IMService.getInstance();
-        //im.setHost(Config.SDK_IM_HOST);
         String androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
 
         im.setDeviceID(androidID);
 
-        long APPID = 1670;//debug 1453
-        im.setAppID(APPID);
+        im.setAppID(Config.XIAOWEI_APPID);
         im.setCustomerMessageHandler(CustomerSupportMessageHandler.getInstance());
         im.registerConnectivityChangeReceiver(getApplicationContext());
     }

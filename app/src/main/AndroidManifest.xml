@@ -76,6 +76,17 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".XWMessageActivity"
+            android:exported="true"
+            android:theme="@style/imkit.NoActionBar"
+            android:windowSoftInputMode="adjustResize|stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".SettingActivity"
             android:label="@string/setting" />

@@ -25,6 +25,7 @@ import com.beetle.bauhinia.tools.Notification;
 import com.beetle.im.SystemMessageObserver;
 import com.beetle.kefu.api.APIService;
 import com.beetle.kefu.api.Authorization;
+import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.User;
 import com.beetle.kefu.api.Customer;
 import com.beetle.kefu.model.NewCount;
@@ -32,12 +33,7 @@ import com.beetle.kefu.model.Token;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
 import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -124,8 +120,10 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         setContentView(R.layout.activity_conversation);
 
         Token token = Token.getInstance();
-        currentUID = token.uid;
-        storeID = token.storeID;
+        Profile profile = Profile.getInstance();
+
+        currentUID = profile.uid;
+        storeID = profile.storeID;
 
         IMService im =  IMService.getInstance();
         im.addObserver(this);
@@ -140,7 +138,8 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         nc.addObserver(this, CustomerSupportMessageActivity.CLEAR_MESSAGES);
         nc.addObserver(this, CustomerSupportMessageActivity.CLEAR_NEW_MESSAGES);
 
-
+        nc.addObserver(this, XWMessageActivity.SEND_MESSAGE_NAME);
+        nc.addObserver(this, XWMessageActivity.CLEAR_NEW_MESSAGES);
     }
 
     @Override
@@ -156,10 +155,6 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
         Log.i(TAG, "message list activity destroyed");
     }
-
-
-
-
 
     public  String messageContentToString(IMessage.MessageContent content) {
         if (content instanceof IMessage.Text) {
@@ -185,21 +180,13 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
     void updateConversationName(Conversation conv) {
         if (conv.type == Conversation.CONVERSATION_CUSTOMER_SERVICE) {
             CustomerConversation cc = (CustomerConversation)conv;
-            User u = getUser(cc.customerAppID, cc.customerID);
-            if (TextUtils.isEmpty(u.name)) {
-                conv.setName(u.identifier);
-                final Conversation fconv = conv;
-                asyncGetUser(cc.customerAppID, cc.customerID, new GetUserCallback() {
-                    @Override
-                    public void onUser(User u) {
-                        fconv.setName(u.name);
-                        fconv.setAvatar(u.avatarURL);
-                    }
-                });
+            if (cc.isXiaoWei) {
+                conv.setName(getResources().getString(R.string.xiaowei));
+                conv.setAvatar("");
             } else {
-                conv.setName(u.name);
-                //超过一天,从服务器更新用户名
-                if (now() - u.timestamp > 24*3600) {
+                User u = getUser(cc.customerAppID, cc.customerID);
+                if (TextUtils.isEmpty(u.name)) {
+                    conv.setName(u.identifier);
                     final Conversation fconv = conv;
                     asyncGetUser(cc.customerAppID, cc.customerID, new GetUserCallback() {
                         @Override
@@ -208,9 +195,22 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
                             fconv.setAvatar(u.avatarURL);
                         }
                     });
+                } else {
+                    conv.setName(u.name);
+                    //超过一天,从服务器更新用户名
+                    if (now() - u.timestamp > 24 * 3600) {
+                        final Conversation fconv = conv;
+                        asyncGetUser(cc.customerAppID, cc.customerID, new GetUserCallback() {
+                            @Override
+                            public void onUser(User u) {
+                                fconv.setName(u.name);
+                                fconv.setAvatar(u.avatarURL);
+                            }
+                        });
+                    }
                 }
+                conv.setAvatar(u.avatarURL);
             }
-            conv.setAvatar(u.avatarURL);
         }
     }
 
@@ -230,6 +230,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
             conv.setUnreadCount(unread);
             updateConversationName(conv);
             updateConversationDetail(conv);
+            conv.isXiaoWei = (conv.customerID == this.currentUID && conv.customerAppID == Config.XIAOWEI_APPID);
             conversations.add(conv);
         }
 
@@ -263,7 +264,12 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         Log.i(TAG, "conv:" + conv.getName());
 
         if (conv.type == Conversation.CONVERSATION_CUSTOMER_SERVICE) {
-            onCustomerServiceClick(conv);
+            CustomerConversation cc = (CustomerConversation)conv;
+            if (cc.isXiaoWei) {
+                onXiaoWeiClick(conv);
+            } else {
+                onCustomerServiceClick(conv);
+            }
         }
     }
 
@@ -289,36 +295,59 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         return (int)(t/1000);
     }
 
+
+    private void onNewCustomerMessage(ICustomerMessage msg) {
+        int pos = findConversationPosition(msg.customerAppID, msg.customerID);
+        CustomerConversation conversation = null;
+        if (pos == -1) {
+            conversation = new CustomerConversation();
+            conversation.type = Conversation.CONVERSATION_CUSTOMER_SERVICE;
+            conversation.cid = msg.customerID;
+            conversation.customerAppID = msg.customerAppID;
+            conversation.customerID = msg.customerID;
+            conversation.isXiaoWei = (conversation.customerID == this.currentUID &&
+                                        conversation.customerAppID == Config.XIAOWEI_APPID);
+        } else {
+            conversation = conversations.get(pos);
+        }
+
+        if (!msg.isOutgoing) {
+            int unread = conversation.getUnreadCount() + 1;
+            conversation.setUnreadCount(unread);
+            NewCount.setNewCount(conversation.customerAppID, conversation.customerID, unread);
+        }
+
+        conversation.message = msg;
+        updateConversationName(conversation);
+        updateConversationDetail(conversation);
+
+        if (pos == -1) {
+            conversations.add(0, conversation);
+            adapter.notifyDataSetChanged();
+        } else if (pos > 0){
+            conversations.remove(pos);
+            conversations.add(0, conversation);
+            adapter.notifyDataSetChanged();
+        } else {
+            //pos == 0
+        }
+    }
+
+    private void clearCustomerNewState(long uid, long appid) {
+
+        int pos = findConversationPosition(appid, uid);
+        if (pos != -1) {
+            CustomerConversation cc = conversations.get(pos);
+            cc.setUnreadCount(0);
+            NewCount.setNewCount(appid, uid, 0);
+        }
+    }
+
     @Override
     public void onNotification(Notification notification) {
         if (notification.name.equals(CustomerSupportMessageActivity.SEND_MESSAGE_NAME)) {
             ICustomerMessage msg = (ICustomerMessage) notification.obj;
-
-            int pos = findConversationPosition(msg.customerAppID, msg.customerID);
-            CustomerConversation conversation = null;
-            if (pos == -1) {
-                conversation = new CustomerConversation();
-                conversation.type = Conversation.CONVERSATION_CUSTOMER_SERVICE;
-                conversation.cid = msg.customerID;
-                conversation.customerAppID = msg.customerAppID;
-                conversation.customerID = msg.customerID;
-            } else {
-                conversation = conversations.get(pos);
-            }
-
-            conversation.message = msg;
-            updateConversationDetail(conversation);
-
-            if (pos == -1) {
-                conversations.add(0, conversation);
-                adapter.notifyDataSetChanged();
-            } else if (pos > 0){
-                conversations.remove(pos);
-                conversations.add(0, conversation);
-                adapter.notifyDataSetChanged();
-            } else {
-                //pos == 0
-            }
+            onNewCustomerMessage(msg);
         } else if (notification.name.equals(CustomerSupportMessageActivity.CLEAR_MESSAGES)) {
             HashMap<String, Long> obj = (HashMap<String, Long> )notification.obj;
             long appid = obj.get("appid");
@@ -329,15 +358,18 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
                 adapter.notifyDataSetChanged();
             }
         } else if (notification.name.equals(CustomerSupportMessageActivity.CLEAR_NEW_MESSAGES)) {
-            HashMap<String, Long> obj = (HashMap<String, Long> )notification.obj;
+            HashMap<String, Long> obj = (HashMap<String, Long>) notification.obj;
             long appid = obj.get("appid");
             long uid = obj.get("uid");
-            int pos = findConversationPosition(appid, uid);
-            if (pos != -1) {
-                CustomerConversation cc = conversations.get(pos);
-                cc.setUnreadCount(0);
-                NewCount.setNewCount(appid, uid, 0);
-            }
+            clearCustomerNewState(uid, appid);
+        } else if (notification.name.equals(XWMessageActivity.SEND_MESSAGE_NAME)) {
+            ICustomerMessage msg = (ICustomerMessage) notification.obj;
+            onNewCustomerMessage(msg);
+        } else if (notification.name.equals(XWMessageActivity.CLEAR_NEW_MESSAGES)) {
+            HashMap<String, Long> obj = (HashMap<String, Long>) notification.obj;
+            long appid = obj.get("appid");
+            long uid = obj.get("uid");
+            clearCustomerNewState(uid, appid);
         }
     }
 
@@ -398,6 +430,21 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         startActivity(intent);
     }
 
+    protected void onXiaoWeiClick(Conversation conv) {
+        ICustomerMessage msg = (ICustomerMessage)conv.message;
+
+        Intent intent = new Intent(this, XWMessageActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        intent.putExtra("title", getResources().getString(R.string.xiaowei));
+        intent.putExtra("store_id", Config.XIAOWEI_STORE_ID);
+        intent.putExtra("seller_id", (long)(0));
+        intent.putExtra("current_uid", this.currentUID);
+        intent.putExtra("app_id", Config.XIAOWEI_APPID);
+
+        startActivity(intent);
+    }
+
     @Override
     public void onCustomerSupportMessage(CustomerMessage msg) {
         Log.i(TAG, "on customer support message");
@@ -409,36 +456,13 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         imsg.isSupport = true;
         imsg.storeID = msg.storeID;
         imsg.sellerID = msg.sellerID;
+        imsg.isOutgoing = (msg.sellerID == this.currentUID);
 
         imsg.setContent(msg.content);
 
-        int pos = findConversationPosition(msg.customerAppID, msg.customerID);
-        CustomerConversation conversation = null;
-        if (pos == -1) {
-            conversation = new CustomerConversation();
-            conversation.type = Conversation.CONVERSATION_CUSTOMER_SERVICE;
-            conversation.cid = msg.customerID;
-            conversation.customerAppID = msg.customerAppID;
-            conversation.customerID = msg.customerID;
-        } else {
-            conversation = conversations.get(pos);
-        }
-
-        conversation.message = imsg;
-        updateConversationName(conversation);
-        updateConversationDetail(conversation);
-
-        if (pos == -1) {
-            conversations.add(0, conversation);
-            adapter.notifyDataSetChanged();
-        } else if (pos > 0) {
-            conversations.remove(pos);
-            conversations.add(0, conversation);
-            adapter.notifyDataSetChanged();
-        } else {
-            //pos == 0
-        }
+        onNewCustomerMessage(imsg);
     }
+
     @Override
     public void onCustomerMessage(CustomerMessage msg) {
         Log.i(TAG, "on customer message");
@@ -450,38 +474,11 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         imsg.isSupport = false;
         imsg.storeID = msg.storeID;
         imsg.sellerID = msg.sellerID;
+        imsg.isOutgoing = (imsg.customerAppID == Config.XIAOWEI_APPID && imsg.customerID == this.currentUID);
 
         imsg.setContent(msg.content);
 
-        int pos = findConversationPosition(msg.customerAppID, msg.customerID);
-        CustomerConversation conversation = null;
-        if (pos == -1) {
-            conversation = new CustomerConversation();
-            conversation.type = Conversation.CONVERSATION_CUSTOMER_SERVICE;
-            conversation.cid = msg.customerID;
-            conversation.customerAppID = msg.customerAppID;
-            conversation.customerID = msg.customerID;
-        } else {
-            conversation = conversations.get(pos);
-        }
-        int unread = conversation.getUnreadCount() + 1;
-        conversation.setUnreadCount(unread);
-        NewCount.setNewCount(conversation.customerAppID, conversation.customerID, unread);
-
-        conversation.message = imsg;
-        updateConversationName(conversation);
-        updateConversationDetail(conversation);
-
-        if (pos == -1) {
-            conversations.add(0, conversation);
-            adapter.notifyDataSetChanged();
-        } else if (pos > 0) {
-            conversations.remove(pos);
-            conversations.add(0, conversation);
-            adapter.notifyDataSetChanged();
-        } else {
-            //pos == 0
-        }
+        onNewCustomerMessage(imsg);
     }
 
     @Override
@@ -524,14 +521,14 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         }
 
         Token t = Token.getInstance();
-
+        Profile profile = Profile.getInstance();
         String androidID = Settings.Secure.getString(this.getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         if (platform == Authorization.PLATFORM_ANDROID && deviceID.equals(androidID)) {
             return;
         }
 
-        if (t.loginTimestamp > timestamp) {
+        if (profile.loginTimestamp > timestamp) {
             return;
         }
 
@@ -541,14 +538,19 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
     void logout() {
         Token t = Token.getInstance();
-        t.uid = 0;
-        t.storeID = 0;
-        t.name = "";
         t.accessToken = "";
         t.refreshToken = "";
         t.expireTimestamp = 0;
-        t.loginTimestamp = 0;
-        t.save();
+        t.save(this);
+
+        Profile profile = Profile.getInstance();
+        profile.uid = 0;
+        profile.storeID = 0;
+        profile.status = "";
+        profile.name = "";
+        profile.avatar = "";
+        profile.loginTimestamp = 0;
+        profile.save(this);
 
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
