@@ -226,11 +226,11 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
             if (conv.message == null) {
                 continue;
             }
+            conv.isXiaoWei = (conv.customerID == this.currentUID && conv.customerAppID == Config.XIAOWEI_APPID);
             int unread = NewCount.getNewCount(conv.customerAppID, conv.customerID);
             conv.setUnreadCount(unread);
             updateConversationName(conv);
             updateConversationDetail(conv);
-            conv.isXiaoWei = (conv.customerID == this.currentUID && conv.customerAppID == Config.XIAOWEI_APPID);
             conversations.add(conv);
         }
 
