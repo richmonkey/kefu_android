@@ -26,12 +26,40 @@
         android:layout_below="@+id/number"
         android:layout_marginTop="4px"/>
 
+    <RadioGroup
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48px"
+        android:layout_gravity="right"
+        android:layout_below="@+id/name"
+        android:orientation="vertical"
+        >
+
+        <RadioButton
+            android:id="@+id/online"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:checked="true"
+            android:layoutDirection="rtl"
+            android:text="@string/online"
+            />
+        <RadioButton
+            android:id="@+id/offline"
+            android:layoutDirection="rtl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offline"
+            />
+    </RadioGroup>
+
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/logout"
         android:id="@+id/button"
-        android:layout_below="@+id/name"
+        android:layout_below="@+id/status"
         android:layout_marginTop="20px"
         android:onClick="onLogout" />
 

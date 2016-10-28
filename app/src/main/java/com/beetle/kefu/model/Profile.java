@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
  */
 
 public class Profile {
+    public static final String STATUS_ONLINE = "online";
+    public static final String STATUS_OFFLINE = "offline";
     private static Profile instance;
     public static Profile getInstance() {
         if (instance == null) {
@@ -16,12 +18,18 @@ public class Profile {
         return instance;
     }
 
+    public String xmDeviceToken;
+
     public String status;
     public long uid;
     public String name;
     public String avatar;
     public long storeID;
     public int loginTimestamp;//单位：秒
+
+    public boolean isOnline() {
+        return (this.status != null && this.status.equals(STATUS_ONLINE));
+    }
 
 
     public void save(Context context) {

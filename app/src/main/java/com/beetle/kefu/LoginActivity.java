@@ -81,6 +81,7 @@ public class LoginActivity extends ActionBarActivity {
                         profile.name = token.name;
                         profile.avatar = "";
                         profile.storeID = token.storeID;
+                        profile.status = Profile.STATUS_ONLINE;
                         profile.loginTimestamp = now();
                         profile.save(LoginActivity.this);
 

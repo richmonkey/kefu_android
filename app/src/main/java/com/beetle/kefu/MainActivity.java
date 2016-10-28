@@ -31,32 +31,12 @@ public class MainActivity extends BaseActivity {
 
     private final static String TAG = "kefu";
 
-    private String xmDeviceToken;
     private Timer refreshTokenTimer;
 
     private Object listener = new Object() {
         @Subscribe
         public void onLogout(BusCenter.Logout e) {
             Log.i(TAG, "MainActivity logout...");
-            if (!TextUtils.isEmpty(MainActivity.this.xmDeviceToken)) {
-                PostDeviceToken t = new PostDeviceToken();
-                t.xmDeviceToken = MainActivity.this.xmDeviceToken;
-                IMHttpAPI.Singleton().unBindDeviceToken(t)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<Object>() {
-                            @Override
-                            public void call(Object o) {
-                                Log.i(TAG, "unbind token success");
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                Log.i(TAG, "unbind token error:" + throwable);
-                            }
-                        });
-
-            }
-
             MainActivity.this.finish();
         }
 
@@ -77,8 +57,7 @@ public class MainActivity extends BaseActivity {
                             Log.i(TAG, "bind token error:" + throwable);
                         }
                     });
-
-            MainActivity.this.xmDeviceToken = token.token;
+            Profile.getInstance().xmDeviceToken = token.token;
         }
     };;
 
