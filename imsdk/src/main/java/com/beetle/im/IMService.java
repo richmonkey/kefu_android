@@ -64,17 +64,19 @@ public class IMService {
     private long uid;
     private long appID;
 
+    private long roomID;
+
     PeerMessageHandler peerMessageHandler;
     GroupMessageHandler groupMessageHandler;
     CustomerMessageHandler customerMessageHandler;
     ArrayList<IMServiceObserver> observers = new ArrayList<IMServiceObserver>();
-    ArrayList<LoginPointObserver> loginPointObservers = new ArrayList<LoginPointObserver>();
     ArrayList<GroupMessageObserver> groupObservers = new ArrayList<GroupMessageObserver>();
     ArrayList<PeerMessageObserver> peerObservers = new ArrayList<PeerMessageObserver>();
     ArrayList<SystemMessageObserver> systemMessageObservers = new ArrayList<SystemMessageObserver>();
     ArrayList<CustomerMessageObserver> customerServiceMessageObservers = new ArrayList<CustomerMessageObserver>();
     ArrayList<VOIPObserver> voipObservers = new ArrayList<VOIPObserver>();
     ArrayList<RTMessageObserver> rtMessageObservers = new ArrayList<RTMessageObserver>();
+    ArrayList<RoomMessageObserver> roomMessageObservers = new ArrayList<RoomMessageObserver>();
 
     HashMap<Integer, IMMessage> peerMessages = new HashMap<Integer, IMMessage>();
     HashMap<Integer, IMMessage> groupMessages = new HashMap<Integer, IMMessage>();
@@ -192,16 +194,6 @@ public class IMService {
         observers.remove(ob);
     }
 
-    public void addLoginPointObserver(LoginPointObserver ob) {
-        if (loginPointObservers.contains(ob)) {
-            return;
-        }
-        loginPointObservers.add(ob);
-    }
-
-    public void removeLoginPointObserver(LoginPointObserver ob) {
-        loginPointObservers.remove(ob);
-    }
 
     public void addPeerObserver(PeerMessageObserver ob) {
         if (peerObservers.contains(ob)) {
@@ -256,6 +248,17 @@ public class IMService {
 
     public void removeRTObserver(RTMessageObserver ob){
         rtMessageObservers.remove(ob);
+    }
+
+    public void addRoomObserver(RoomMessageObserver ob) {
+        if (roomMessageObservers.contains(ob)) {
+            return;
+        }
+        roomMessageObservers.add(ob);
+    }
+
+    public void removeRoomObserver(RoomMessageObserver ob) {
+        roomMessageObservers.remove(ob);
     }
 
     public void pushVOIPObserver(VOIPObserver ob) {
@@ -446,6 +449,43 @@ public class IMService {
         return sendMessage(msg);
     }
 
+    public boolean sendRoomMessage(RoomMessage rm) {
+        Message msg = new Message();
+        msg.cmd = Command.MSG_ROOM_IM;
+        msg.body = rm;
+        return sendMessage(msg);
+    }
+
+    private void sendEnterRoom(long roomID) {
+        Message msg = new Message();
+        msg.cmd = Command.MSG_ENTER_ROOM;
+        msg.body = new Long(roomID);
+        sendMessage(msg);
+    }
+
+    private void sendLeaveRoom(long roomID) {
+        Message msg = new Message();
+        msg.cmd = Command.MSG_LEAVE_ROOM;
+        msg.body = new Long(roomID);
+        sendMessage(msg);
+    }
+
+    public void enterRoom(long roomID) {
+        if (roomID == 0) {
+            return;
+        }
+        this.roomID = roomID;
+        sendEnterRoom(roomID);
+    }
+
+    public void leaveRoom(long roomID) {
+        if (this.roomID != roomID || roomID == 0) {
+            return;
+        }
+        sendLeaveRoom(roomID);
+        this.roomID = 0;
+    }
+
     private void close() {
         Iterator iter = peerMessages.entrySet().iterator();
         while (iter.hasNext()) {
@@ -587,6 +627,9 @@ public class IMService {
                     IMService.this.connectState = ConnectState.STATE_CONNECTED;
                     IMService.this.publishConnectState();
                     IMService.this.sendAuth();
+                    if (IMService.this.roomID > 0) {
+                        IMService.this.sendEnterRoom(IMService.this.roomID);
+                    }
                     IMService.this.tcp.startRead();
                 }
             }
@@ -820,6 +863,7 @@ public class IMService {
             ob.onRTMessage(rt);
         }
     }
+
     private void handleVOIPControl(Message msg) {
         VOIPControl ctl = (VOIPControl)msg.body;
 
@@ -831,12 +875,16 @@ public class IMService {
         ob.onVOIPControl(ctl);
     }
 
-    private void handlePong(Message msg) {
-        this.pingTimestamp = 0;
+    private void handleRoomMessage(Message msg) {
+        RoomMessage rm = (RoomMessage)msg.body;
+        for (int i= 0; i < roomMessageObservers.size(); i++) {
+            RoomMessageObserver ob = roomMessageObservers.get(i);
+            ob.onRoomMessage(rm);
+        }
     }
 
-    private void handleLoginPoint(Message msg) {
-        publishLoginPoint((LoginPoint) msg.body);
+    private void handlePong(Message msg) {
+        this.pingTimestamp = 0;
     }
 
     private void handleMessage(Message msg) {
@@ -855,8 +903,6 @@ public class IMService {
             handleGroupIMMessage(msg);
         } else if (msg.cmd == Command.MSG_GROUP_NOTIFICATION) {
             handleGroupNotification(msg);
-        } else if (msg.cmd == Command.MSG_LOGIN_POINT) {
-            handleLoginPoint(msg);
         } else if (msg.cmd == Command.MSG_SYSTEM) {
             handleSystemMessage(msg);
         } else if (msg.cmd == Command.MSG_RT) {
@@ -867,6 +913,8 @@ public class IMService {
             handleCustomerMessage(msg);
         } else if (msg.cmd == Command.MSG_CUSTOMER_SUPPORT) {
             handleCustomerSupportMessage(msg);
+        } else if (msg.cmd == Command.MSG_ROOM_IM) {
+            handleRoomMessage(msg);
         } else {
             Log.i(TAG, "unknown message cmd:"+msg.cmd);
         }
@@ -1024,13 +1072,6 @@ public class IMService {
         for (int i = 0; i < observers.size(); i++ ) {
             IMServiceObserver ob = observers.get(i);
             ob.onConnectState(connectState);
-        }
-    }
-
-    private void publishLoginPoint(final LoginPoint lp) {
-        for (int i = 0; i < loginPointObservers.size(); i++) {
-            LoginPointObserver ob = loginPointObservers.get(i);
-            ob.onLoginPoint(lp);
         }
     }
 
