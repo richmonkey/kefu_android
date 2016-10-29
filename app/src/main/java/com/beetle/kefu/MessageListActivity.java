@@ -219,6 +219,8 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         if (position < conversations.size() && position >= 0) {
             CustomerConversation conv = conversations.get(position);
             CustomerSupportMessageDB.getInstance().clearCoversation(conv.customerID, conv.customerAppID);
+            ConversationDB.setTop(conv.customerAppID, conv.customerID, false);
+            ConversationDB.setNewCount(conv.customerAppID, conv.customerID, 0);
             conversations.remove(position);
             adapter.notifyDataSetChanged();
         }
@@ -462,15 +464,42 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         updateConversationName(conversation);
         updateConversationDetail(conversation);
 
-        if (pos == -1) {
-            conversations.add(0, conversation);
-            adapter.notifyDataSetChanged();
-        } else if (pos > 0){
-            conversations.remove(pos);
-            conversations.add(0, conversation);
-            adapter.notifyDataSetChanged();
+        if (conversation.top) {
+            if (pos == -1) {
+                conversations.add(0, conversation);
+                adapter.notifyDataSetChanged();
+            } else if (pos > 0) {
+                conversations.remove(pos);
+                conversations.add(0, conversation);
+                adapter.notifyDataSetChanged();
+            } else {
+                //pos == 0
+            }
         } else {
-            //pos == 0
+            //第一个非置顶的会话
+            int index = -1;
+            for (int i = 0; i < conversations.size(); i++) {
+                CustomerConversation cc = conversations.get(i);
+                if (!cc.top) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index == -1) {
+                index = conversations.size();
+            }
+
+            if (pos == -1) {
+                conversations.add(index, conversation);
+                adapter.notifyDataSetChanged();
+            } else if (pos > 0 && index < pos) {
+                //向上移动
+                conversations.remove(pos);
+                conversations.add(index, conversation);
+                adapter.notifyDataSetChanged();
+            } else {
+                //pos == 0
+            }
         }
     }
 
