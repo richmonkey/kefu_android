@@ -3,6 +3,7 @@ package com.beetle.kefu;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -52,56 +53,11 @@ public class CustomerSupportMessageActivity extends MessageActivity
     long customerID;
     long customerAppID;
 
-    public static class User {
-        public long uid;
-        public String name;
-        public String avatarURL;
 
-        //name为nil时，界面显示identifier字段
-        public String identifier;
-    }
-
-    protected User getUser(long uid) {
-        User u = new User();
-        u.uid = uid;
-        u.name = null;
-        u.avatarURL = "";
-        u.identifier = String.format("%d", uid);
-        return u;
-    }
-
-    public interface GetUserCallback {
-        void onUser(User u);
-    }
-
-    protected void asyncGetUser(long uid, GetUserCallback cb) {
-
-    }
-
-    private void loadUserName(IMessage msg) {
-        User u = getUser(msg.sender);
-
-        msg.setSenderAvatar(u.avatarURL);
-        if (TextUtils.isEmpty(u.name)) {
-            msg.setSenderName(u.identifier);
-            final IMessage fmsg = msg;
-            asyncGetUser(msg.sender, new GetUserCallback() {
-                @Override
-                public void onUser(User u) {
-                    fmsg.setSenderName(u.name);
-                    fmsg.setSenderAvatar(u.avatarURL);
-                }
-            });
-        } else {
-            msg.setSenderName(u.name);
-        }
-    }
 
 
     public CustomerSupportMessageActivity() {
         super();
-        sendNotificationName = SEND_MESSAGE_NAME;
-        clearNotificationName = CLEAR_MESSAGES;
     }
 
     @Override
@@ -127,8 +83,10 @@ public class CustomerSupportMessageActivity extends MessageActivity
 
 
         this.loadConversationData();
+
+
         if (!TextUtils.isEmpty(customerName)) {
-            titleView.setText(customerName);
+            getSupportActionBar().setTitle(customerName);
         }
 
         CustomerSupportOutbox.getInstance().addObserver(this);
@@ -140,7 +98,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "peer message activity destory");
+        Log.i(TAG, "customer support message activity destory");
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
         HashMap<String, Long>  o = new HashMap();
@@ -349,7 +307,6 @@ public class CustomerSupportMessageActivity extends MessageActivity
         imsg.setFailure(true);
     }
 
-    @Override
     protected void sendMessage(IMessage imsg) {
         if (imsg.content.getType() == IMessage.MessageType.MESSAGE_AUDIO) {
             CustomerSupportOutbox ob = CustomerSupportOutbox.getInstance();
@@ -378,7 +335,6 @@ public class CustomerSupportMessageActivity extends MessageActivity
         }
     }
 
-    @Override
     protected void saveMessageAttachment(IMessage msg, String address) {
         ICustomerMessage attachment = new ICustomerMessage();
         attachment.content = IMessage.newAttachment(msg.msgLocalID, address);
@@ -387,17 +343,14 @@ public class CustomerSupportMessageActivity extends MessageActivity
         saveMessage(attachment);
     }
 
-    @Override
     protected void saveMessage(IMessage imsg) {
         CustomerSupportMessageDB.getInstance().insertMessage(imsg);
     }
 
-    @Override
     protected void markMessageFailure(IMessage imsg) {
         CustomerSupportMessageDB.getInstance().markMessageFailure(imsg.msgLocalID, customerID, customerAppID);
     }
 
-    @Override
     protected void eraseMessageFailure(IMessage imsg) {
         CustomerSupportMessageDB.getInstance().eraseMessageFailure(imsg.msgLocalID, customerID, customerAppID);
     }
@@ -413,7 +366,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
         HashMap<String, Long>  o = new HashMap();
         o.put("appid", this.customerAppID);
         o.put("uid", this.customerID);
-        Notification notification = new Notification(o, clearNotificationName);
+        Notification notification = new Notification(o, CLEAR_MESSAGES);
         nc.postNotification(notification);
 
     }
@@ -559,7 +512,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
         insertMessage(msg);
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
-        Notification notification = new Notification(msg, sendNotificationName);
+        Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
         nc.postNotification(notification);
     }
 
@@ -614,7 +567,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
             sendMessage(msg);
 
             NotificationCenter nc = NotificationCenter.defaultCenter();
-            Notification notification = new Notification(msg, sendNotificationName);
+            Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
             nc.postNotification(notification);
 
         } catch (IOException e) {
@@ -662,7 +615,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
             sendMessage(msg);
 
             NotificationCenter nc = NotificationCenter.defaultCenter();
-            Notification notification = new Notification(msg, sendNotificationName);
+            Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
             nc.postNotification(notification);
 
         } catch (IllegalStateException e) {
@@ -703,7 +656,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
         sendMessage(msg);
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
-        Notification notification = new Notification(msg, sendNotificationName);
+        Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
         nc.postNotification(notification);
     }
 }

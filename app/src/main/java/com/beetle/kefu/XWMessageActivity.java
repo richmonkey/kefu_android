@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.beetle.bauhinia.CustomerMessageActivity;
 import com.beetle.bauhinia.MessageActivity;
 import com.beetle.bauhinia.db.ICustomerMessage;
 import com.beetle.bauhinia.db.IMessage;
@@ -53,56 +52,8 @@ public class XWMessageActivity extends MessageActivity
     protected long sellerID;
 
 
-    public static class User {
-        public long uid;
-        public String name;
-        public String avatarURL;
-
-        //name为nil时，界面显示identifier字段
-        public String identifier;
-    }
-
-    protected CustomerMessageActivity.User getUser(long uid) {
-        CustomerMessageActivity.User u = new CustomerMessageActivity.User();
-        u.uid = uid;
-        u.name = null;
-        u.avatarURL = "";
-        u.identifier = String.format("%d", uid);
-        return u;
-    }
-
-    public interface GetUserCallback {
-        void onUser(CustomerMessageActivity.User u);
-    }
-
-    protected void asyncGetUser(long uid, CustomerMessageActivity.GetUserCallback cb) {
-
-    }
-
-    private void loadUserName(IMessage msg) {
-        CustomerMessageActivity.User u = getUser(msg.sender);
-
-        msg.setSenderAvatar(u.avatarURL);
-        if (TextUtils.isEmpty(u.name)) {
-            msg.setSenderName(u.identifier);
-            final IMessage fmsg = msg;
-            asyncGetUser(msg.sender, new CustomerMessageActivity.GetUserCallback() {
-                @Override
-                public void onUser(CustomerMessageActivity.User u) {
-                    fmsg.setSenderName(u.name);
-                    fmsg.setSenderAvatar(u.avatarURL);
-                }
-            });
-        } else {
-            msg.setSenderName(u.name);
-        }
-    }
-
-
     public XWMessageActivity() {
         super();
-        sendNotificationName = SEND_MESSAGE_NAME;
-        clearNotificationName = CLEAR_MESSAGES;
     }
 
     @Override
@@ -127,7 +78,7 @@ public class XWMessageActivity extends MessageActivity
 
         this.loadConversationData();
         if (!TextUtils.isEmpty(title)) {
-            titleView.setText(title);
+            getSupportActionBar().setTitle(title);
         }
 
         XWCustomerOutbox.getInstance().addObserver(this);
@@ -139,7 +90,7 @@ public class XWMessageActivity extends MessageActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "peer message activity destory");
+        Log.i(TAG, "xiaowei message activity destory");
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
         HashMap<String, Long> o = new HashMap();
@@ -349,7 +300,6 @@ public class XWMessageActivity extends MessageActivity
         imsg.setFailure(true);
     }
 
-    @Override
     protected void sendMessage(IMessage imsg) {
         if (imsg.content.getType() == IMessage.MessageType.MESSAGE_AUDIO) {
             XWCustomerOutbox ob = XWCustomerOutbox.getInstance();
@@ -378,7 +328,6 @@ public class XWMessageActivity extends MessageActivity
         }
     }
 
-    @Override
     protected void saveMessageAttachment(IMessage msg, String address) {
         ICustomerMessage attachment = new ICustomerMessage();
         attachment.content = IMessage.newAttachment(msg.msgLocalID, address);
@@ -387,17 +336,14 @@ public class XWMessageActivity extends MessageActivity
         saveMessage(attachment);
     }
 
-    @Override
     protected void saveMessage(IMessage imsg) {
         CustomerSupportMessageDB.getInstance().insertMessage(imsg);
     }
 
-    @Override
     protected void markMessageFailure(IMessage imsg) {
         CustomerSupportMessageDB.getInstance().markMessageFailure(imsg.msgLocalID, this.currentUID, this.appID);
     }
 
-    @Override
     protected void eraseMessageFailure(IMessage imsg) {
         CustomerSupportMessageDB.getInstance().eraseMessageFailure(imsg.msgLocalID, this.currentUID, this.appID);
     }
@@ -503,7 +449,7 @@ public class XWMessageActivity extends MessageActivity
         insertMessage(msg);
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
-        Notification notification = new Notification(msg, sendNotificationName);
+        Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
         nc.postNotification(notification);
     }
 
@@ -558,7 +504,7 @@ public class XWMessageActivity extends MessageActivity
             sendMessage(msg);
 
             NotificationCenter nc = NotificationCenter.defaultCenter();
-            Notification notification = new Notification(msg, sendNotificationName);
+            Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
             nc.postNotification(notification);
 
         } catch (IOException e) {
@@ -606,7 +552,7 @@ public class XWMessageActivity extends MessageActivity
             sendMessage(msg);
 
             NotificationCenter nc = NotificationCenter.defaultCenter();
-            Notification notification = new Notification(msg, sendNotificationName);
+            Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
             nc.postNotification(notification);
 
         } catch (IllegalStateException e) {
@@ -647,7 +593,7 @@ public class XWMessageActivity extends MessageActivity
         sendMessage(msg);
 
         NotificationCenter nc = NotificationCenter.defaultCenter();
-        Notification notification = new Notification(msg, sendNotificationName);
+        Notification notification = new Notification(msg, SEND_MESSAGE_NAME);
         nc.postNotification(notification);
     }
 

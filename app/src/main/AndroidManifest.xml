@@ -70,7 +70,7 @@
         <activity
             android:name=".CustomerSupportMessageActivity"
             android:exported="true"
-            android:theme="@style/imkit.NoActionBar"
+            android:theme="@style/imkit.ActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -80,7 +80,7 @@
         <activity
             android:name=".XWMessageActivity"
             android:exported="true"
-            android:theme="@style/imkit.NoActionBar"
+            android:theme="@style/imkit.ActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
