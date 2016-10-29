@@ -19,6 +19,7 @@ import com.beetle.kefu.api.APIService;
 import com.beetle.kefu.api.Authorization;
 import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.Token;
+import com.kaopiz.kprogresshud.KProgressHUD;
 
 import java.io.File;
 import java.util.Date;
@@ -64,6 +65,13 @@ public class LoginActivity extends ActionBarActivity {
         u.deviceID = androidID;
         u.platform = Authorization.PLATFORM_ANDROID;
 
+        final KProgressHUD hud = KProgressHUD.create(this)
+                .setStyle(KProgressHUD.Style.SPIN_INDETERMINATE)
+                .setCancellable(true)
+                .setAnimationSpeed(1)
+                .setDimAmount(0.5f)
+                .show();
+
         Authorization api = APIService.getAuthoriation();
         api.getAccessToken(u).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Authorization.AccessToken>() {
@@ -87,6 +95,8 @@ public class LoginActivity extends ActionBarActivity {
 
                         LoginActivity.this.insertWelcomeMessage();
 
+                        hud.dismiss();
+                        
                         Intent intent = new Intent(LoginActivity.this, MessageListActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
@@ -97,6 +107,7 @@ public class LoginActivity extends ActionBarActivity {
                     @Override
                     public void call(Throwable throwable) {
                         Log.i(TAG, "throwable:" + throwable);
+                        hud.dismiss();
                         RetrofitError error = (RetrofitError)throwable;
                         if (error.getResponse() != null) {
                             Authorization.Error e = (Authorization.Error) error.getBodyAs(Authorization.Error.class);

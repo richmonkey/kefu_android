@@ -1,66 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context="com.beetle.kefu.SettingActivity">
 
-    <TextView
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="客服工号"
-        android:id="@+id/number"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_marginTop="48dp"
+        android:background="@color/white"
+        android:minHeight="32dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="客服工号"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"/>
 
-    <TextView
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:text="1000"
+            android:id="@+id/number"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:minHeight="32dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="客服姓名"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:text="哈哈"
+            android:id="@+id/name"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+
+
+
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="客服姓名"
-        android:id="@+id/name"
-        android:layout_below="@+id/number"
-        android:layout_marginTop="4px"/>
+        android:layout_marginTop="16dp"
+        android:minHeight="32dp"
+        android:background="@color/white"
+        android:onClick="onOnlineClick">
 
-    <RadioGroup
-        android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48px"
-        android:layout_gravity="right"
-        android:layout_below="@+id/name"
-        android:orientation="vertical"
-        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="在线"
 
-        <RadioButton
+            android:layout_marginTop="4px"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
             android:id="@+id/online"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:src="@drawable/icon_checked"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"/>
 
-            android:checked="true"
-            android:layoutDirection="rtl"
-            android:text="@string/online"
-            />
-        <RadioButton
-            android:id="@+id/offline"
-            android:layoutDirection="rtl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/offline"
-            />
-    </RadioGroup>
+    </RelativeLayout>
 
-    <Button
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/logout"
-        android:id="@+id/button"
-        android:layout_below="@+id/status"
-        android:layout_marginTop="20px"
-        android:onClick="onLogout" />
+        android:minHeight="32dp"
+        android:background="@color/white"
+        android:onClick="onOfflineClick">
 
-</RelativeLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="隐身"
+            android:layout_marginTop="4px"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:id="@+id/offline"
+            android:src="@drawable/icon_checked"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
+
+    <Button  android:id="@+id/button" android:layout_width="fill_parent"
+        android:layout_height="wrap_content" android:text="@string/logout"
+        android:background="@drawable/btn_bg_red" android:textSize="15dip"
+        android:layout_marginTop="20dip"
+        android:onClick="onLogout"/>
+
+
+
+</LinearLayout>

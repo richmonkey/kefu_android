@@ -41,6 +41,10 @@ public class ConversationView extends FrameLayout implements PropertyChangeListe
         tv = (TextView)this.findViewById(R.id.content);
         tv.setText(c.getDetail());
 
+        String ts = TimeUtil.formatTimeBase(c.message.timestamp);
+        tv = (TextView)findViewById(R.id.timestamp);
+        tv.setText(ts);
+
         int placeholder;
         if (c.type == Conversation.CONVERSATION_PEER) {
             placeholder = R.drawable.avatar_contact;

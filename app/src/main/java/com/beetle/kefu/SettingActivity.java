@@ -10,7 +10,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,35 +45,21 @@ public class SettingActivity extends BaseActivity {
 
         mainHandler = new Handler(getMainLooper());
 
-        //todo replace radiobutton
-        RadioGroup radioGroup = (RadioGroup)findViewById(R.id.status);
-
         Profile profile = Profile.getInstance();
+
         if (profile.isOnline()) {
-            radioGroup.check(R.id.online);
+            findViewById(R.id.online).setVisibility(View.VISIBLE);
+            findViewById(R.id.offline).setVisibility(View.GONE);
         } else {
-            radioGroup.check(R.id.offline);
+            findViewById(R.id.online).setVisibility(View.GONE);
+            findViewById(R.id.offline).setVisibility(View.VISIBLE);
         }
-
-
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId==R.id.online){
-                    Log.i(TAG, "online");
-                    setUserStatus(true);
-                } else if(checkedId==R.id.offline){
-                    Log.i(TAG, "offline");
-                    setUserStatus(false);
-                }
-            }
-        });
 
         TextView numberTextView = (TextView)findViewById(R.id.number);
         TextView nameTextView = (TextView)findViewById(R.id.name);
-        numberTextView.setText(String.format("客服工号    %d", profile.uid));
+        numberTextView.setText(String.format("%d", profile.uid));
         if (!TextUtils.isEmpty(profile.name)) {
-            nameTextView.setText(String.format("客服姓名    %s", profile.name));
+            nameTextView.setText(String.format("%s", profile.name));
         }
     }
 
@@ -104,6 +89,12 @@ public class SettingActivity extends BaseActivity {
         return request;
     }
 
+    public void onOnlineClick(View v) {
+        setUserStatus(true);
+    }
+    public void onOfflineClick(View v) {
+        setUserStatus(false);
+    }
 
     Request newSetUserStatusRequest(boolean online) {
         Profile profile = Profile.getInstance();
@@ -181,6 +172,15 @@ public class SettingActivity extends BaseActivity {
                             Profile profile = Profile.getInstance();
                             profile.status = online ? Profile.STATUS_ONLINE : Profile.STATUS_OFFLINE;
                             profile.save(SettingActivity.this);
+
+                            if (profile.isOnline()) {
+                                findViewById(R.id.online).setVisibility(View.VISIBLE);
+                                findViewById(R.id.offline).setVisibility(View.GONE);
+                            } else {
+                                findViewById(R.id.online).setVisibility(View.GONE);
+                                findViewById(R.id.offline).setVisibility(View.VISIBLE);
+                            }
+
                             hud.dismiss();
                         }
                     };
