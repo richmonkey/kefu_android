@@ -37,6 +37,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.+'
 
     compile 'com.kaopiz:kprogresshud:1.0.5'
+    compile 'com.baoyz.swipemenulistview:library:1.3.0'
 
     compile 'com.squareup:otto:1.3.5'
     compile 'com.google.code.gson:gson:2.3.1'

@@ -9,5 +9,6 @@ public class CustomerConversation extends Conversation {
     public long customerAppID;
     public long customerID;
 
+    public boolean top;
     public boolean isXiaoWei;
 }

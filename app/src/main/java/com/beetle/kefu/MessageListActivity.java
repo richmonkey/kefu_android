@@ -1,16 +1,24 @@
 package com.beetle.kefu;
 
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.beetle.bauhinia.db.Conversation;
 import com.beetle.bauhinia.db.ConversationIterator;
 import com.beetle.bauhinia.db.ICustomerMessage;
@@ -28,7 +36,7 @@ import com.beetle.kefu.api.Authorization;
 import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.User;
 import com.beetle.kefu.api.Customer;
-import com.beetle.kefu.model.NewCount;
+import com.beetle.kefu.model.ConversationDB;
 import com.beetle.kefu.model.Token;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
@@ -54,11 +62,12 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
     private static final String TAG = "beetle";
 
     private List<CustomerConversation> conversations;
-    private ListView lv;
+    private SwipeMenuListView lv;
     protected long currentUID = 0;
     protected long storeID = 0;
 
-    private BaseAdapter adapter;
+    private ConversationAdapter adapter;
+
     class ConversationAdapter extends BaseAdapter {
         @Override
         public int getCount() {
@@ -72,6 +81,23 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         public long getItemId(int position) {
             return position;
         }
+
+        @Override
+        public int getViewTypeCount() {
+            // menu type count
+            return 2;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            CustomerConversation conversation = conversations.get(position);
+            if (!conversation.top) {
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ConversationView view = null;
@@ -86,12 +112,116 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         }
     }
 
+    private int dp2px(int dp) {
+        Resources r = getResources();
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float)dp, r.getDisplayMetrics());
+        return (int)px;
+    }
     // 初始化组件
     private void initWidget() {
-        lv = (ListView) findViewById(R.id.list);
+        SwipeMenuCreator creator = new SwipeMenuCreator() {
+            @Override
+            public void create(SwipeMenu menu) {
+                SwipeMenuItem openItem = new SwipeMenuItem(
+                        getApplicationContext());
+                openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
+                        0xCE)));
+                openItem.setWidth(dp2px(90));
+                if (menu.getViewType() == 0) {
+                    openItem.setTitle("置顶");
+                } else {
+                    openItem.setTitle("取消置顶");
+                }
+                openItem.setTitleSize(18);
+                openItem.setTitleColor(Color.WHITE);
+                menu.addMenuItem(openItem);
+
+                SwipeMenuItem deleteItem = new SwipeMenuItem(
+                        getApplicationContext());
+                deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
+                        0x3F, 0x25)));
+                deleteItem.setWidth(dp2px(90));
+                deleteItem.setTitle("Delete");
+                deleteItem.setTitleSize(18);
+                deleteItem.setTitleColor(Color.WHITE);
+
+                menu.addMenuItem(deleteItem);
+            }
+        };
+
+        lv = (SwipeMenuListView) findViewById(R.id.list);
         adapter = new ConversationAdapter();
         lv.setAdapter(adapter);
         lv.setOnItemClickListener(this);
+        lv.setMenuCreator(creator);
+        lv.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                switch (index) {
+                    case 0:
+                        Log.i(TAG, "on top:" + position);
+                        MessageListActivity.this.setConversationTop(position);
+                        break;
+                    case 1:
+                        Log.i(TAG, "on delete:" + position);
+                        MessageListActivity.this.deleteConversation(position);
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    //置顶或者取消置顶
+    private void setConversationTop(int position) {
+        if (position < conversations.size() && position >= 0) {
+            CustomerConversation conv = conversations.get(position);
+            boolean top;
+            if (conv.top) {
+                top = false;
+                ConversationDB.setTop(conv.customerAppID, conv.customerID, false);
+            } else {
+                top = true;
+                ConversationDB.setTop(conv.customerAppID, conv.customerID, true);
+            }
+
+            if (top) {
+                if (position > 0) {
+                    conversations.remove(position);
+                    conversations.add(0, conv);
+                }
+                conv.top = top;
+            } else {
+                //第一个非置顶的会话
+                int index = -1;
+                for (int i = 0; i < conversations.size(); i++) {
+                    CustomerConversation cc = conversations.get(i);
+                    if (!cc.top) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index == -1) {
+                    index = conversations.size() - 1;
+                } else {
+                    index = index - 1;
+                }
+                if (position < index) {
+                    conversations.remove(position);
+                    conversations.add(index, conv);
+                }
+                conv.top = top;
+            }
+            adapter.notifyDataSetChanged();
+        }
+    }
+    private void deleteConversation(int position) {
+        if (position < conversations.size() && position >= 0) {
+            CustomerConversation conv = conversations.get(position);
+            CustomerSupportMessageDB.getInstance().clearCoversation(conv.customerID, conv.customerAppID);
+            conversations.remove(position);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -227,7 +357,8 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
                 continue;
             }
             conv.isXiaoWei = (conv.customerID == this.currentUID && conv.customerAppID == Config.XIAOWEI_APPID);
-            int unread = NewCount.getNewCount(conv.customerAppID, conv.customerID);
+            conv.top = ConversationDB.getTop(conv.customerAppID, conv.customerID);
+            int unread = ConversationDB.getNewCount(conv.customerAppID, conv.customerID);
             conv.setUnreadCount(unread);
             updateConversationName(conv);
             updateConversationDetail(conv);
@@ -236,9 +367,19 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
         Comparator<Conversation> cmp = new Comparator<Conversation>() {
             public int compare(Conversation c1, Conversation c2) {
-                if (c1.message.timestamp > c2.message.timestamp) {
+
+                CustomerConversation cc1 = (CustomerConversation)c1;
+                CustomerConversation cc2 = (CustomerConversation)c2;
+
+                long top1 = cc1.top ? 1 : 0;
+                long top2 = cc2.top ? 1 : 0;
+
+                long t1 = top1 << 32 | c1.message.timestamp;
+                long t2 = top2 << 32 | c2.message.timestamp;
+
+                if (t1 > t2) {
                     return -1;
-                } else if (c1.message.timestamp == c2.message.timestamp) {
+                } else if (t1 == t2) {
                     return 0;
                 } else {
                     return 1;
@@ -314,7 +455,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         if (!msg.isOutgoing) {
             int unread = conversation.getUnreadCount() + 1;
             conversation.setUnreadCount(unread);
-            NewCount.setNewCount(conversation.customerAppID, conversation.customerID, unread);
+            ConversationDB.setNewCount(conversation.customerAppID, conversation.customerID, unread);
         }
 
         conversation.message = msg;
@@ -339,7 +480,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         if (pos != -1) {
             CustomerConversation cc = conversations.get(pos);
             cc.setUnreadCount(0);
-            NewCount.setNewCount(appid, uid, 0);
+            ConversationDB.setNewCount(appid, uid, 0);
         }
     }
 

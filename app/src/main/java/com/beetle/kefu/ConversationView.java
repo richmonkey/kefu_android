@@ -1,7 +1,9 @@
 package com.beetle.kefu;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 
 import com.beetle.bauhinia.db.Conversation;
 import com.beetle.bauhinia.db.IMessage;
+
 import com.squareup.picasso.Picasso;
 
 import java.beans.PropertyChangeEvent;
@@ -35,6 +38,13 @@ public class ConversationView extends FrameLayout implements PropertyChangeListe
         this.conversation.addPropertyChangeListener(this);
 
 
+        CustomerConversation cc = (CustomerConversation)c;
+        if (cc.top) {
+            setBackgroundColor(getResources().getColor(R.color.top));
+        } else {
+            setBackgroundColor(Color.WHITE);
+        }
+
         TextView tv = (TextView) this.findViewById(R.id.name);
         tv.setText(c.getName());
 
@@ -51,7 +61,6 @@ public class ConversationView extends FrameLayout implements PropertyChangeListe
         } else if (c.type == Conversation.CONVERSATION_GROUP){
             placeholder = R.drawable.avatar_group;
         } else if (c.type == Conversation.CONVERSATION_CUSTOMER_SERVICE){
-            CustomerConversation cc = (CustomerConversation)conversation;
             if (cc.isXiaoWei) {
                 placeholder = R.drawable.xiaowei;
             } else {
@@ -96,10 +105,19 @@ public class ConversationView extends FrameLayout implements PropertyChangeListe
             tv.setText(this.conversation.getName());
         } else if (event.getPropertyName().equals("avatar")) {
             int placeholder;
-            if (this.conversation.type == Conversation.CONVERSATION_PEER) {
+            if (conversation.type == Conversation.CONVERSATION_PEER) {
                 placeholder = R.drawable.avatar_contact;
-            } else {
+            } else if (conversation.type == Conversation.CONVERSATION_GROUP){
                 placeholder = R.drawable.avatar_group;
+            } else if (conversation.type == Conversation.CONVERSATION_CUSTOMER_SERVICE){
+                CustomerConversation cc = (CustomerConversation)conversation;
+                if (cc.isXiaoWei) {
+                    placeholder = R.drawable.xiaowei;
+                } else {
+                    placeholder = R.drawable.avatar_contact;
+                }
+            } else {
+                placeholder = R.drawable.avatar_contact;
             }
 
             String avatar = null;
