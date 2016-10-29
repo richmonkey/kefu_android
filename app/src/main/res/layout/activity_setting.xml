@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:background="@color/white"
-        android:minHeight="32dp">
+        android:minHeight="40dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -30,12 +30,23 @@
             android:layout_centerVertical="true"/>
     </RelativeLayout>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white">
+        <View android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:background="@color/gray"/>
+    </FrameLayout>
+
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        android:minHeight="32dp">
+        android:minHeight="40dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,6 +54,7 @@
             android:text="客服姓名"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"/>
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -60,7 +72,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:minHeight="32dp"
+        android:minHeight="40dp"
         android:background="@color/white"
         android:onClick="onOnlineClick">
 
@@ -85,10 +97,26 @@
 
     </RelativeLayout>
 
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white">
+        <View android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:background="@color/gray"/>
+    </FrameLayout>
+
+
+
+
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:minHeight="32dp"
+        android:minHeight="40dp"
         android:background="@color/white"
         android:onClick="onOfflineClick">
 
@@ -115,8 +143,11 @@
     <Button  android:id="@+id/button" android:layout_width="fill_parent"
         android:layout_height="wrap_content" android:text="@string/logout"
         android:background="@drawable/btn_bg_red" android:textSize="15dip"
-        android:layout_marginTop="20dip"
-        android:onClick="onLogout"/>
+        android:onClick="onLogout"
+        android:layout_marginTop="32dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        />
 
 
 
