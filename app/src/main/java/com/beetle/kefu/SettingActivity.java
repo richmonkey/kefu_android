@@ -10,12 +10,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.Token;
 import com.kaopiz.kprogresshud.KProgressHUD;
+import com.kyleduo.switchbutton.SwitchButton;
 import com.squareup.otto.Bus;
 
 
@@ -61,6 +63,18 @@ public class SettingActivity extends BaseActivity {
         if (!TextUtils.isEmpty(profile.name)) {
             nameTextView.setText(String.format("%s", profile.name));
         }
+
+        SwitchButton switchButton = (SwitchButton)findViewById(R.id.run);
+        switchButton.setCheckedImmediately(profile.keepalive);
+        switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Profile profile = Profile.getInstance();
+                profile.keepalive = isChecked;
+                profile.save(SettingActivity.this);
+                Log.i(TAG, "app keepalive: " + (isChecked ? "on" : "off"));
+            }
+        });
     }
 
     Request newUnregisterRequest(String xmDeviceToken) {
@@ -230,6 +244,7 @@ public class SettingActivity extends BaseActivity {
         profile.name = "";
         profile.avatar = "";
         profile.loginTimestamp = 0;
+        profile.keepalive = false;
         profile.save(this);
 
         Intent intent = new Intent(this, LoginActivity.class);

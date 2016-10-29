@@ -6,4 +6,5 @@
     <string name="setting">设置</string>
     <string name="online">在线</string>
     <string name="offline">隐身</string>
+    <string name="running">正在运行</string>
 </resources>

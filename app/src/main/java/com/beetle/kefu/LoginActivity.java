@@ -91,6 +91,7 @@ public class LoginActivity extends ActionBarActivity {
                         profile.storeID = token.storeID;
                         profile.status = Profile.STATUS_ONLINE;
                         profile.loginTimestamp = now();
+                        profile.keepalive = false;
                         profile.save(LoginActivity.this);
 
                         LoginActivity.this.insertWelcomeMessage();

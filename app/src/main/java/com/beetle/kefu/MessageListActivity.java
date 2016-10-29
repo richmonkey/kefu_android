@@ -720,6 +720,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         profile.name = "";
         profile.avatar = "";
         profile.loginTimestamp = 0;
+        profile.keepalive = false;
         profile.save(this);
 
         Intent intent = new Intent(this, LoginActivity.class);

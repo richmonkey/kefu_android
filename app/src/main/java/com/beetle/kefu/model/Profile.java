@@ -20,6 +20,8 @@ public class Profile {
 
     public String xmDeviceToken;
 
+    public boolean keepalive;
+
     public String status;
     public long uid;
     public String name;
@@ -42,6 +44,7 @@ public class Profile {
         editor.putString("avatar", this.avatar != null ? this.avatar : "");
         editor.putString("status", this.status != null ? this.status : "");
         editor.putInt("timestamp", this.loginTimestamp);
+        editor.putInt("keepalive", this.keepalive ? 1 : 0);
 
         editor.commit();
     }
@@ -55,5 +58,6 @@ public class Profile {
         this.avatar = customer.getString("avatar", "");
         this.loginTimestamp = customer.getInt("timestamp", 0);
         this.status = customer.getString("status", "");
+        this.keepalive = customer.getInt("keepalive", 0) == 1;
     }
 }

@@ -6,117 +6,145 @@
     android:orientation="vertical"
     tools:context="com.beetle.kefu.SettingActivity">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
-        android:background="@color/white"
-        android:minHeight="40dp">
-        <TextView
-            android:layout_width="wrap_content"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:text="客服工号"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"/>
+            android:background="@color/white"
+            android:minHeight="40dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="客服工号"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:text="1000"
-            android:id="@+id/number"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"/>
-    </RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:text="1000"
+                android:id="@+id/number"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/white">
+
         <View android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:background="@color/gray"/>
-    </FrameLayout>
 
 
-    <RelativeLayout
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:minHeight="40dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="客服姓名"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:text="哈哈"
+                android:id="@+id/name"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:minHeight="40dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:text="客服姓名"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"/>
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:text="哈哈"
-            android:id="@+id/name"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"/>
-    </RelativeLayout>
-
-
-
-    <RelativeLayout
-        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:minHeight="40dp"
-        android:background="@color/white"
-        android:onClick="onOnlineClick">
-
-        <TextView
-            android:layout_width="wrap_content"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:text="在线"
+            android:minHeight="40dp"
+            android:background="@color/white"
+            android:onClick="onOnlineClick">
 
-            android:layout_marginTop="4px"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="在线"
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:id="@+id/online"
-            android:src="@drawable/icon_checked"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"/>
+                android:layout_marginTop="4px"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
 
-    </RelativeLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:id="@+id/online"
+                android:src="@drawable/icon_checked"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
 
 
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/white">
+
         <View android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:background="@color/gray"/>
-    </FrameLayout>
 
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:background="@color/white"
+            android:onClick="onOfflineClick">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="隐身"
+                android:layout_marginTop="4px"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
 
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:id="@+id/offline"
+                android:src="@drawable/icon_checked"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:minHeight="40dp"
+        android:layout_marginTop="16dp"
         android:background="@color/white"
         android:onClick="onOfflineClick">
 
@@ -124,20 +152,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
-            android:text="隐身"
+            android:text="后台运行"
             android:layout_marginTop="4px"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"/>
 
-        <ImageView
+
+        <com.kyleduo.switchbutton.SwitchButton
+            android:id="@+id/run"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="16dp"
-            android:id="@+id/offline"
-            android:src="@drawable/icon_checked"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"/>
-
     </RelativeLayout>
 
     <Button  android:id="@+id/button" android:layout_width="fill_parent"
