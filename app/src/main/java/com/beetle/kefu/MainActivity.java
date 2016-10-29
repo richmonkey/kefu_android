@@ -162,6 +162,8 @@ public class MainActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
 
+        Log.i(TAG, "main activity on stop");
+
         if (!isAppOnForeground()) {
             if (refreshTokenTimer != null) {
                 refreshTokenTimer.suspend();

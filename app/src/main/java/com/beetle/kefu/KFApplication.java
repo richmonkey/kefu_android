@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.beetle.bauhinia.tools.FileCache;
@@ -82,22 +83,47 @@ public class KFApplication extends Application implements Application.ActivityLi
     }
 
 
-    @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+    private int started = 0;
+    private int stopped = 0;
 
+    public void onActivityCreated(Activity activity, Bundle bundle) {
+        Log.i("","onActivityCreated:" + activity.getLocalClassName());
     }
-    @Override
-    public void onActivityStarted(Activity activity) {
 
-    }
-    public void onActivityResumed(Activity activity) {
-        IMService.getInstance().enterForeground();
+    public void onActivityDestroyed(Activity activity) {
+        Log.i("","onActivityDestroyed:" + activity.getLocalClassName());
     }
 
     public void onActivityPaused(Activity activity) {
-
+        Log.i("","onActivityPaused:" + activity.getLocalClassName());
     }
+
+    public void onActivityResumed(Activity activity) {
+        Log.i("","onActivityResumed:" + activity.getLocalClassName());
+    }
+
+    public void onActivitySaveInstanceState(Activity activity,
+                                            Bundle outState) {
+        Log.i("","onActivitySaveInstanceState:" + activity.getLocalClassName());
+    }
+
+    public void onActivityStarted(Activity activity) {
+        Log.i("","onActivityStarted:" + activity.getLocalClassName());
+        ++started;
+
+        if (started - stopped == 1 ) {
+            IMService.getInstance().enterForeground();
+        }
+    }
+
     public void onActivityStopped(Activity activity) {
+        Log.i("","onActivityStopped:" + activity.getLocalClassName());
+        ++stopped;
+        if (stopped == started) {
+            Log.i(TAG, "app enter background stop imservice");
+            IMService.getInstance().enterBackground();
+        }
+
         if (!isAppOnForeground()) {
             //keep app foreground state
             Profile profile = Profile.getInstance();
@@ -108,14 +134,6 @@ public class KFApplication extends Application implements Application.ActivityLi
             }
         }
     }
-
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-    }
-    public void onActivityDestroyed(Activity activity) {
-
-    }
-
 
     /**
      * 程序是否在前台运行
