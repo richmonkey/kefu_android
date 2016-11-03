@@ -103,6 +103,24 @@ public class SettingActivity extends BaseActivity {
         return request;
     }
 
+    public void onHelpClick(View v) {
+
+        Intent intent = new Intent(this, XWMessageActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        intent.putExtra("title", getResources().getString(R.string.xiaowei));
+        intent.putExtra("store_id", Config.XIAOWEI_STORE_ID);
+        intent.putExtra("seller_id", Config.XIAOWEI_SELLER_ID);
+        intent.putExtra("current_uid", Profile.getInstance().uid);
+        intent.putExtra("app_id", Config.XIAOWEI_APPID);
+
+        startActivity(intent);
+    }
+
+    public void onAboutClick(View v) {
+        Log.i(TAG, "on about click");
+    }
+
     public void onOnlineClick(View v) {
         setUserStatus(true);
     }

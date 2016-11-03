@@ -167,6 +167,62 @@
             android:layout_centerVertical="true"/>
     </RelativeLayout>
 
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:background="@color/white"
+            android:onClick="onHelpClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="帮助与反馈"
+                android:layout_marginTop="4px"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+
+
+
+        <View android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:background="@color/gray"/>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:background="@color/white"
+            android:onClick="onAboutClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="关于我们"
+                android:layout_marginTop="4px"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"/>
+
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+
     <Button  android:id="@+id/button" android:layout_width="fill_parent"
         android:layout_height="wrap_content" android:text="@string/logout"
         android:background="@drawable/btn_bg_red" android:textSize="15dip"
