@@ -75,10 +75,14 @@ public class XWMessageActivity extends MessageActivity
 
         this.isShowUserName = intent.getBooleanExtra("show_name", false);
 
-
         this.loadConversationData();
         if (!TextUtils.isEmpty(title)) {
             getSupportActionBar().setTitle(title);
+        }
+
+        //显示最后一条消息
+        if (this.messages.size() > 0) {
+            listview.setSelection(this.messages.size() - 1);
         }
 
         XWCustomerOutbox.getInstance().addObserver(this);
