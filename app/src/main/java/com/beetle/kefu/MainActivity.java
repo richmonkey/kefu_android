@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.beetle.bauhinia.api.IMHttpAPI;
 import com.beetle.bauhinia.api.body.PostDeviceToken;
+import com.beetle.bauhinia.db.SyncKeyHandler;
 import com.beetle.im.IMService;
 import com.beetle.im.Timer;
 import com.beetle.kefu.api.APIService;
@@ -18,6 +19,8 @@ import com.xiaomi.mipush.sdk.MiPushClient;
 
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -79,6 +82,14 @@ public class MainActivity extends BaseActivity {
         IMService im =  IMService.getInstance();
         im.setUID(profile.uid);
         im.setToken(token.accessToken);
+
+        SyncKeyHandler handler = new SyncKeyHandler(this.getApplicationContext(), "sync_key");
+        handler.load();
+
+        IMService.getInstance().setSyncKey(handler.getSyncKey());
+        Log.i(TAG, "sync key:" + handler.getSyncKey());
+        IMService.getInstance().setSyncKeyHandler(handler);
+
         im.start();
 
         int now = getNow();

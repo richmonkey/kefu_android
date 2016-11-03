@@ -28,6 +28,7 @@ public class XWCustomerOutbox extends Outbox {
     @Override
     protected void sendImageMessage(IMessage imsg, String url) {
         ICustomerMessage cm = (ICustomerMessage)imsg;
+        IMessage.Image image = (IMessage.Image)imsg.content;
 
         CustomerMessage msg = new CustomerMessage();
         msg.msgLocalID = imsg.msgLocalID;
@@ -35,7 +36,7 @@ public class XWCustomerOutbox extends Outbox {
         msg.customerID = cm.customerID;
         msg.storeID = cm.storeID;
         msg.sellerID = cm.sellerID;
-        msg.content = IMessage.newImage(url).getRaw();
+        msg.content = IMessage.newImage(url, image.width, image.height, image.getUUID()).getRaw();
 
         IMService im = IMService.getInstance();
         im.sendCustomerMessage(msg);
@@ -53,7 +54,7 @@ public class XWCustomerOutbox extends Outbox {
         msg.storeID = cm.storeID;
         msg.sellerID = cm.sellerID;
 
-        msg.content = IMessage.newAudio(url, audio.duration).getRaw();
+        msg.content = IMessage.newAudio(url, audio.duration, audio.getUUID()).getRaw();
 
         IMService im = IMService.getInstance();
         im.sendCustomerMessage(msg);

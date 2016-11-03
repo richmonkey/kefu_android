@@ -69,7 +69,7 @@ public class XWMessageActivity extends MessageActivity
         title = intent.getStringExtra("title");
 
         Log.i(TAG, "uid:" + currentUID + " app id:" + appID + " store id:" + storeID + " seller id:" + sellerID + " title:" + title);
-        if (appID == 0 || currentUID == 0 || storeID == 0) {
+        if (appID == 0 || currentUID == 0 || storeID == 0 || sellerID == 0) {
             return;
         }
 
@@ -309,7 +309,7 @@ public class XWMessageActivity extends MessageActivity
         } else if (imsg.content.getType() == IMessage.MessageType.MESSAGE_IMAGE) {
             IMessage.Image image = (IMessage.Image)imsg.content;
             //prefix:"file:"
-            String path = image.image.substring(5);
+            String path = image.url.substring(5);
             imsg.setUploading(true);
             CustomerOutbox.getInstance().uploadImage(imsg, path);
         } else {
@@ -497,7 +497,7 @@ public class XWMessageActivity extends MessageActivity
             msg.isSupport = false;
             msg.isOutgoing = true;
 
-            msg.setContent(IMessage.newImage("file:" + path));
+            msg.setContent(IMessage.newImage("file:" + path, (int)newWidth, (int)newHeight));
 
             saveMessage(msg);
             insertMessage(msg);

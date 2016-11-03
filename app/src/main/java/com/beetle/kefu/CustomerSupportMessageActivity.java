@@ -73,7 +73,6 @@ public class CustomerSupportMessageActivity extends MessageActivity
         customerAppID = intent.getLongExtra("customer_appid", 0);
         customerName = intent.getStringExtra("customer_name");
 
-
         Log.i(TAG, "uid:" + currentUID + " store id:" + storeID +
                 " customer id:" + customerID + " customer appid:" +
                 customerAppID + " name:" + customerName);
@@ -81,12 +80,15 @@ public class CustomerSupportMessageActivity extends MessageActivity
 
         this.isShowUserName = intent.getBooleanExtra("show_name", false);
 
-
         this.loadConversationData();
-
 
         if (!TextUtils.isEmpty(customerName)) {
             getSupportActionBar().setTitle(customerName);
+        }
+
+        //显示最后一条消息
+        if (this.messages.size() > 0) {
+            listview.setSelection(this.messages.size() - 1);
         }
 
         CustomerSupportOutbox.getInstance().addObserver(this);
@@ -316,7 +318,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
         } else if (imsg.content.getType() == IMessage.MessageType.MESSAGE_IMAGE) {
             IMessage.Image image = (IMessage.Image)imsg.content;
             //prefix:"file:"
-            String path = image.image.substring(5);
+            String path = image.url.substring(5);
             imsg.setUploading(true);
             CustomerSupportOutbox.getInstance().uploadImage(imsg, path);
         } else {
@@ -560,7 +562,7 @@ public class CustomerSupportMessageActivity extends MessageActivity
             msg.isSupport = true;
             msg.isOutgoing = true;
 
-            msg.setContent(IMessage.newImage("file:" + path));
+            msg.setContent(IMessage.newImage("file:" + path, (int)newWidth, (int)newHeight));
 
             saveMessage(msg);
             insertMessage(msg);

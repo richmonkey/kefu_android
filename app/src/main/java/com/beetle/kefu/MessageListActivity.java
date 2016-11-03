@@ -608,7 +608,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
 
         intent.putExtra("title", getResources().getString(R.string.xiaowei));
         intent.putExtra("store_id", Config.XIAOWEI_STORE_ID);
-        intent.putExtra("seller_id", (long)(0));
+        intent.putExtra("seller_id", Config.XIAOWEI_SELLER_ID);
         intent.putExtra("current_uid", this.currentUID);
         intent.putExtra("app_id", Config.XIAOWEI_APPID);
 

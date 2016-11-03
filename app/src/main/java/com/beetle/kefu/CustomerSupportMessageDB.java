@@ -150,7 +150,7 @@ public class CustomerSupportMessageDB extends MessageDB {
             byte[] buf = new byte[64 * 1024];
             int pos = 0;
 
-            byte[] content = msg.content.raw.getBytes("UTF-8");
+            byte[] content = msg.content.getRaw().getBytes("UTF-8");
             int len = content.length + 4 + 4 + 8 + 8 + 8 + 8 + 1;
             if (4 + 4 + len + 4 + 4 > 64 * 1024) return false;
 
