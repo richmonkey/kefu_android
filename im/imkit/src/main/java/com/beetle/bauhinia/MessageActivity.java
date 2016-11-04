@@ -443,6 +443,7 @@ public class MessageActivity extends BaseActivity implements
 
                             if (im.content.getType() == IMessage.MessageType.MESSAGE_TEXT) {
                                 actions.add(ChatItemQuickAction.ChatQuickAction.COPY);
+                                actions.add(ChatQuickAction.SEARCH);
                             }
 
                             if (actions.size() == 0) {
@@ -464,6 +465,9 @@ public class MessageActivity extends BaseActivity implements
                                                     break;
                                                 case RESEND:
                                                     MessageActivity.this.resend(im);
+                                                    break;
+                                                case SEARCH:
+                                                    MessageActivity.this.search(im);
                                                     break;
                                                 default:
                                                     break;
@@ -719,6 +723,9 @@ public class MessageActivity extends BaseActivity implements
         Log.i(TAG, "not implemented");
     }
 
+    protected void search(IMessage msg) {
+        Log.i(TAG, "not implemented");
+    }
     void saveMessageAttachment(IMessage msg, String address) {
         Log.i(TAG, "not implemented");
     }

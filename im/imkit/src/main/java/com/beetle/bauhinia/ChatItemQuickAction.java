@@ -12,7 +12,7 @@ import com.beetle.imkit.R;
 
 public class ChatItemQuickAction {
     public enum ChatQuickAction {
-        DELETE, FORWARD, RESEND, COPY;
+        DELETE, FORWARD, RESEND, COPY, SEARCH;
 
         public String getName(Context context) {
             switch (this) {
@@ -24,6 +24,8 @@ public class ChatItemQuickAction {
                     return context.getString(R.string.im_btn_resend);
                 case COPY:
                     return context.getString(R.string.im_btn_copy);
+                case SEARCH:
+                    return context.getString(R.string.im_btn_search);
             }
             return "";
         }

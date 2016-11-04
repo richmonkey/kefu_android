@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.widget.Toast;
 
 import com.beetle.bauhinia.MessageActivity;
@@ -110,6 +111,10 @@ public class XWMessageActivity extends MessageActivity
         AudioDownloader.getInstance().removeObserver(this);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
+    }
 
     protected void loadUserName(IMessage msg) {
         ICustomerMessage cm = (ICustomerMessage)msg;

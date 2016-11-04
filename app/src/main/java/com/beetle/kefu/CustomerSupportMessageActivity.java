@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.widget.Toast;
 
 import com.beetle.bauhinia.MessageActivity;
@@ -112,6 +113,11 @@ public class CustomerSupportMessageActivity extends MessageActivity
         IMService.getInstance().removeObserver(this);
         IMService.getInstance().removeCustomerServiceObserver(this);
         AudioDownloader.getInstance().removeObserver(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
     }
 
     protected void loadUserName(IMessage msg) {
@@ -458,30 +464,20 @@ public class CustomerSupportMessageActivity extends MessageActivity
     }
 
 
+    protected void search(IMessage msg) {
+        if (msg.content.getType() != IMessage.MessageType.MESSAGE_TEXT) {
+            return;
+        }
+        IMessage.Text text = (IMessage.Text)msg.content;
+        Intent intent = new Intent(this, RobotActivity.class);
+        intent.putExtra("question", text.text);
+        startActivityForResult(intent, ROBOT);
+    }
+
     @Override
     protected void onRobotClick() {
         Log.i(TAG, "on robot click");
-
-        if (messages.size() == 0) {
-            return;
-        }
-
-        String question = "";
-        for (int i = messages.size() - 1; i > 0; i--) {
-            IMessage m = messages.get(i);
-            IMessage.MessageType msgType = m.content.getType();
-            if (!m.isOutgoing & msgType == IMessage.MessageType.MESSAGE_TEXT) {
-                question = ((IMessage.Text) m.content).text;
-                break;
-            }
-        }
-
-        if (TextUtils.isEmpty(question)) {
-            return;
-        }
-
         Intent intent = new Intent(this, RobotActivity.class);
-        intent.putExtra("question", question);
         startActivityForResult(intent, ROBOT);
     }
 
