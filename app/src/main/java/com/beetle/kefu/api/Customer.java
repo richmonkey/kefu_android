@@ -17,5 +17,6 @@ public interface Customer {
         public String appid;
         public String uid;
         public String name;
+        public String avatar;
     }
 }

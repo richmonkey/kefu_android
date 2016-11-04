@@ -21,6 +21,7 @@ import com.beetle.im.CustomerMessage;
 import com.beetle.im.CustomerMessageObserver;
 import com.beetle.im.IMService;
 import com.beetle.im.IMServiceObserver;
+import com.beetle.kefu.model.Profile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -109,6 +110,23 @@ public class XWMessageActivity extends MessageActivity
         AudioDownloader.getInstance().removeObserver(this);
     }
 
+
+    protected void loadUserName(IMessage msg) {
+        ICustomerMessage cm = (ICustomerMessage)msg;
+        if (cm.isSupport) {
+            msg.setSenderName("小微团队");
+            File dir = getCacheDir();
+            File iconFile = new File(dir, "xiaowei.png");
+            String path = iconFile.getAbsolutePath();
+            String imageUri = "file:" + path;
+            msg.setSenderAvatar(imageUri);
+        } else {
+            Profile profile = Profile.getInstance();
+            msg.setSenderAvatar(profile.avatar);
+            msg.setSenderName(profile.name);
+        }
+    }
+
     protected void loadConversationData() {
         messages = new ArrayList<IMessage>();
 
@@ -134,6 +152,7 @@ public class XWMessageActivity extends MessageActivity
         }
 
         downloadMessageContent(messages, count);
+        loadUserName(messages, count);
         checkMessageFailureFlag(messages, count);
         resetMessageTimeBase();
     }
@@ -203,6 +222,7 @@ public class XWMessageActivity extends MessageActivity
         }
         if (count > 0) {
             downloadMessageContent(messages, count);
+            loadUserName(messages, count);
             checkMessageFailureFlag(messages, count);
             resetMessageTimeBase();
             adapter.notifyDataSetChanged();
@@ -447,6 +467,7 @@ public class XWMessageActivity extends MessageActivity
         msg.isOutgoing = true;
 
         msg.setContent(IMessage.newText(text));
+        loadUserName(msg);
 
         saveMessage(msg);
         sendMessage(msg);
@@ -502,6 +523,7 @@ public class XWMessageActivity extends MessageActivity
             msg.isOutgoing = true;
 
             msg.setContent(IMessage.newImage("file:" + path, (int)newWidth, (int)newHeight));
+            loadUserName(msg);
 
             saveMessage(msg);
             insertMessage(msg);
@@ -549,6 +571,7 @@ public class XWMessageActivity extends MessageActivity
             FileInputStream is = new FileInputStream(new File(tfile));
             Log.i(TAG, "store audio url:" + audio.url);
             FileCache.getInstance().storeFile(audio.url, is);
+            loadUserName(msg);
 
             saveMessage(msg);
             Log.i(TAG, "msg local id:" + msg.msgLocalID);
@@ -583,6 +606,7 @@ public class XWMessageActivity extends MessageActivity
         msg.isOutgoing = true;
         IMessage.Location loc = IMessage.newLocation(latitude, longitude);
         msg.setContent(loc);
+        loadUserName(msg);
 
         saveMessage(msg);
 

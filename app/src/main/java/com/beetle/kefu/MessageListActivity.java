@@ -43,6 +43,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.otto.Bus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -314,7 +315,12 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
             CustomerConversation cc = (CustomerConversation)conv;
             if (cc.isXiaoWei) {
                 conv.setName(getResources().getString(R.string.xiaowei));
-                conv.setAvatar("");
+                File dir = getCacheDir();
+                File iconFile = new File(dir, "xiaowei.png");
+                String path = iconFile.getAbsolutePath();
+                String imageUri = "file:" + path;
+                Log.i(TAG, "icon file path:" + imageUri);
+                conv.setAvatar(imageUri);
             } else {
                 User u = getUser(cc.customerAppID, cc.customerID);
                 if (TextUtils.isEmpty(u.name)) {
@@ -330,7 +336,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
                 } else {
                     conv.setName(u.name);
                     //超过一天,从服务器更新用户名
-                    if (now() - u.timestamp > 24 * 3600) {
+                    if (now() - u.timestamp > 24 * 3600 || true) {
                         final Conversation fconv = conv;
                         asyncGetUser(cc.customerAppID, cc.customerID, new GetUserCallback() {
                             @Override
@@ -571,6 +577,7 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
                         u.appID = appid;
                         u.uid = uid;
                         u.name = user.name;
+                        u.avatarURL = user.avatar;
                         u.timestamp = now();
                         if (!TextUtils.isEmpty(u.name)) {
                             User.save(u);
@@ -594,6 +601,9 @@ public class MessageListActivity extends MainActivity implements IMServiceObserv
         intent.putExtra("customer_id", msg.customerID);
         intent.putExtra("customer_appid", msg.customerAppID);
         intent.putExtra("customer_name", conv.getName());
+        if (!TextUtils.isEmpty(conv.getAvatar())) {
+            intent.putExtra("customer_avatar", conv.getAvatar());
+        }
         intent.putExtra("store_id", storeID);
         intent.putExtra("current_uid", this.currentUID);
 

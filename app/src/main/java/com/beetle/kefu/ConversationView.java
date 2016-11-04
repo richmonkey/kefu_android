@@ -61,11 +61,7 @@ public class ConversationView extends FrameLayout implements PropertyChangeListe
         } else if (c.type == Conversation.CONVERSATION_GROUP){
             placeholder = R.drawable.avatar_group;
         } else if (c.type == Conversation.CONVERSATION_CUSTOMER_SERVICE){
-            if (cc.isXiaoWei) {
-                placeholder = R.drawable.xiaowei;
-            } else {
-                placeholder = R.drawable.avatar_contact;
-            }
+            placeholder = R.drawable.avatar_contact;
         } else {
             placeholder = R.drawable.avatar_contact;
         }

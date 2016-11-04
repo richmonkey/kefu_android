@@ -13,11 +13,16 @@ import com.beetle.kefu.api.APIService;
 import com.beetle.kefu.api.Authorization;
 import com.beetle.kefu.model.Profile;
 import com.beetle.kefu.model.Token;
+import com.google.code.p.leveldb.LevelDB;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.xiaomi.mipush.sdk.MiPushClient;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,9 +72,14 @@ public class MainActivity extends BaseActivity {
     @Override
     protected  void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         Token token = Token.getInstance();
         Profile profile = Profile.getInstance();
+
+        LevelDB ldb = LevelDB.getDefaultDB();
+        String dbPath = getFilesDir().getAbsoluteFile() + File.separator + "db_" + profile.uid;
+        Log.i(TAG, "leveldb dir:" + dbPath);
+        ldb.open(dbPath);
+
         CustomerSupportMessageDB db = CustomerSupportMessageDB.getInstance();
         File f = this.getDir("" + profile.uid, MODE_PRIVATE);
         File f2 = new File(f, "customer");
@@ -105,6 +115,25 @@ public class MainActivity extends BaseActivity {
         Bus bus = BusCenter.getBus();
         bus.register(listener);
 
+        try
+        {
+            File dir = getCacheDir();
+            File iconFile = new File(dir, "xiaowei.png");
+            if (iconFile.length() == 0) {
+                InputStream inputStream = getResources().openRawResource(R.drawable.xiaowei);
+                OutputStream out = new FileOutputStream(iconFile);
+                byte buf[] = new byte[1024];
+                int len;
+                while ((len = inputStream.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.close();
+                inputStream.close();
+            }
+        }
+        catch (IOException e) {
+
+        }
     }
 
     private void initXiaomiPush() {
@@ -199,6 +228,8 @@ public class MainActivity extends BaseActivity {
         super.onDestroy();
         IMService im = IMService.getInstance();
         im.stop();
+
+        LevelDB.getDefaultDB().close();
 
         BusCenter.getBus().unregister(listener);
     }

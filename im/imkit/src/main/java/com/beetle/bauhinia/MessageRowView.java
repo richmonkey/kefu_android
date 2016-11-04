@@ -107,7 +107,7 @@ public class MessageRowView extends FrameLayout implements PropertyChangeListene
         if (headerView != null && !TextUtils.isEmpty(avatar)) {
             Picasso.with(context)
                     .load(avatar)
-                    .placeholder(R.drawable.image_download_fail)
+                    .placeholder(R.drawable.avatar_contact)
                     .into(headerView);
         }
     }

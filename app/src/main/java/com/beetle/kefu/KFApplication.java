@@ -42,11 +42,6 @@ public class KFApplication extends Application implements Application.ActivityLi
         Profile profile = Profile.getInstance();
         profile.load(this);
 
-        LevelDB ldb = LevelDB.getDefaultDB();
-        String dir = getFilesDir().getAbsoluteFile() + File.separator + "db";
-        Log.i(TAG, "dir:" + dir);
-        ldb.open(dir);
-
         FileCache fc = FileCache.getInstance();
         fc.setDir(this.getDir("cache", MODE_PRIVATE));
 
